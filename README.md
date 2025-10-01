@@ -1,231 +1,99 @@
-# MyMovie - Movie Ticket Booking Application
+# MyMovie – Movie Ticket Booking System
 
 ## Overview
-A comprehensive online movie ticket booking system built with Spring Boot (backend) and React (frontend), following Test-Driven Development (TDD) approach.
+MyMovie is a full-stack movie ticket booking project built with Spring Boot and React. The current implementation focuses on dependable booking flows, practical administrative CRUD operations, and a polished landing experience for end users. Everything documented below reflects features that already exist in the repository.
 
-## Features
+## What’s Implemented
 
-### Customer Features
-- User registration and authentication
-- Browse movies, theatres, and shows
-- Book tickets with seat selection
-- Immediate seat availability validation during checkout
-- View booking history and status
-- Real-time seat availability
+### Backend (Spring Boot)
+- In-memory H2 database seeded with users, movies, theatres, screens, shows, and seats via `DataInitializer`.
+- REST controllers for managing movies, theatres, shows, bookings, users, and customers.
+- Server-side seat validation that rejects duplicate or already-reserved seats before a booking is persisted.
+- Aggregation endpoint that summarizes bookings grouped by movie, exposing counts and revenue metrics.
+- Stateless security configuration (CSRF disabled, CORS enabled) tuned for the SPA frontend; no JWT or session logic is wired yet.
+- Unit tests covering service and controller layers (`src/test/java/com/moviebooking`).
 
-### Admin Features
-- Movie management (CRUD operations)
-- Theatre management
-- Show scheduling
-- Booking analytics and reports
-- User management
+### Frontend (React)
+- React 18 single-page app bootstrapped with Create React App and React Router.
+- Hero carousel with image preloading, thumbnail previews, and gradient overlays on the `Home` component.
+- Featured movie cards with consistent poster sizing and hover states.
+- Navigation, login/register, dashboard, booking, movie, theatre, and show components scaffolded for the booking flow.
+- Global styling in `App.css` aligned with the hero and featured sections.
 
-## Technology Stack
+## Key Backend Endpoints
 
-### Backend
-- **Framework**: Spring Boot 3.1.5
-- **Database**: H2 (development), MySQL (production)
-- **ORM**: JPA with Hibernate
-- **Security**: Spring Security with JWT
-- **Testing**: JUnit 5, Mockito
-- **Build Tool**: Maven
+| Purpose | Method & Path |
+| --- | --- |
+| Register a user | `POST /api/users/register` |
+| Sign in a user (basic placeholder) | `POST /api/users/signin` |
+| CRUD movies | `GET/POST/PUT/DELETE /api/movies` |
+| CRUD theatres | `GET/POST/PUT/DELETE /api/theatres` |
+| Retrieve shows (by theatre/date) | `GET /api/shows`, `/api/shows/theatre/{theatreId}`, `/api/shows/date/{date}` |
+| Create a booking with seat validation | `POST /api/bookings` |
+| Booking summary grouped by movie | `GET /api/bookings/summary/movies` |
 
-### Frontend
-- **Framework**: React 18.2.0
-- **Routing**: React Router DOM
-- **UI Framework**: React Bootstrap
-- **HTTP Client**: Axios
-- **Package Manager**: npm
+All endpoints respond with JSON and rely on the seeded data for demo usage.
 
-## Project Structure
+## Repository Layout
 
 ```
 MyMovie/
-├── src/main/java/com/moviebooking/
-│   ├── MovieBookingApplication.java
-│   ├── config/
-│   │   ├── SecurityConfig.java
-│   │   └── DataInitializer.java
-│   ├── entity/
-│   │   ├── User.java
-│   │   ├── Customer.java
-│   │   ├── Admin.java
-│   │   ├── Movie.java
-│   │   ├── Theatre.java
-│   │   ├── Screen.java
-│   │   ├── Show.java
-│   │   ├── Seat.java
-│   │   ├── Ticket.java
-│   │   └── TicketBooking.java
-│   ├── repository/
-│   │   ├── IUserRepository.java
-│   │   ├── ICustomerRepository.java
-│   │   ├── IMovieRepository.java
-│   │   ├── ITheatreRepository.java
-│   │   ├── IShowRepository.java
-│   │   ├── ISeatRepository.java
-│   │   └── IBookingRepository.java
-│   ├── service/
-│   │   ├── interfaces/
-│   │   └── impl/
-│   └── controller/
-├── src/test/java/com/moviebooking/
-│   ├── service/
-│   └── controller/
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Navigation.js
-│   │   │   ├── Home.js
-│   │   │   ├── Movies.js
-│   │   │   ├── Theatres.js
-│   │   │   ├── Shows.js
-│   │   │   ├── BookTicket.js
-│   │   │   ├── Login.js
-│   │   │   ├── Register.js
-│   │   │   ├── CustomerDashboard.js
-│   │   │   └── AdminDashboard.js
-│   │   ├── App.js
-│   │   ├── index.js
-│   │   ├── App.css
-│   │   └── index.css
-│   ├── public/
-│   └── package.json
-└── pom.xml
+├─ pom.xml
+├─ src/
+│  ├─ main/java/com/moviebooking/
+│  │  ├─ MovieBookingApplication.java
+│  │  ├─ config/
+│  │  ├─ controller/
+│  │  ├─ dto/
+│  │  ├─ entity/
+│  │  ├─ repository/
+│  │  └─ service/
+│  └─ test/java/com/moviebooking/
+├─ frontend/
+│  ├─ package.json
+│  └─ src/
+│     ├─ App.js / App.css
+│     ├─ index.js
+│     └─ components/
+└─ run-app.bat
 ```
 
-## API Endpoints
-
-### User Management
-- `POST /api/users/register` - User registration
-- `POST /api/users/signin` - User login
-- `POST /api/users/signout` - User logout
-
-### Customer Management
-- `GET /api/customers/{id}` - Get customer details
-- `POST /api/customers` - Create customer
-- `PUT /api/customers/{id}` - Update customer
-- `DELETE /api/customers/{id}` - Delete customer
-
-### Movie Management
-- `GET /api/movies` - Get all movies
-- `GET /api/movies/{id}` - Get movie by ID
-- `POST /api/movies` - Add new movie
-- `PUT /api/movies/{id}` - Update movie
-- `DELETE /api/movies/{id}` - Delete movie
-
-### Theatre Management
-- `GET /api/theatres` - Get all theatres
-- `GET /api/theatres/{id}` - Get theatre by ID
-- `GET /api/theatres/city/{city}` - Get theatres by city
-- `POST /api/theatres` - Add new theatre
-- `PUT /api/theatres/{id}` - Update theatre
-- `DELETE /api/theatres/{id}` - Delete theatre
-
-### Show Management
-- `GET /api/shows` - Get all shows
-- `GET /api/shows/{id}` - Get show by ID
-- `GET /api/shows/theatre/{theatreId}` - Get shows by theatre
-- `GET /api/shows/date/{date}` - Get shows by date
-- `POST /api/shows` - Add new show
-- `PUT /api/shows/{id}` - Update show
-- `DELETE /api/shows/{id}` - Delete show
-
-### Booking Management
-- `GET /api/bookings` - Get all bookings
-- `GET /api/bookings/movie/{movieId}` - Get bookings by movie
-- `GET /api/bookings/show/{showId}` - Get bookings by show
-- `GET /api/bookings/date/{date}` - Get bookings by date
-- `GET /api/bookings/summary/movies` - Get aggregate booking metrics grouped by movie
-- `POST /api/bookings` - Create booking
-- `PUT /api/bookings/{id}` - Update booking
-- `DELETE /api/bookings/{id}` - Cancel booking
-
-## Database Schema
-
-The application uses the following main entities:
-
-1. **User** - Authentication and role management
-2. **Customer** - Customer profile information
-3. **Admin** - Administrator details
-4. **Movie** - Movie information and metadata
-5. **Theatre** - Theatre details and location
-6. **Screen** - Theatre screens with seating configuration
-7. **Show** - Movie showings with timing and theatre
-8. **Seat** - Individual seat information and pricing
-9. **Ticket** - Ticket details with seat allocation
-10. **TicketBooking** - Booking transaction details
-
-## Setup Instructions
+## Running the Project
 
 ### Prerequisites
-- Java 17 or higher
-- Node.js 16 or higher
-- Maven 3.6 or higher
+- Java 17+
+- Node.js 16+
+- Maven 3.6+
 
-### Backend Setup
-1. Clone the repository
-2. Navigate to the project root
-3. Run `mvn clean install`
-4. Run `mvn spring-boot:run`
-5. Backend will start on `http://localhost:8080`
+### Backend
+```powershell
+cd C:\Users\P12C4F0\IdeaProjects\MyMovie
+mvn spring-boot:run
+```
 
-### Frontend Setup
-1. Navigate to the `frontend` directory
-2. Run `npm install`
-3. Run `npm start`
-4. Frontend will start on `http://localhost:3000`
+The API starts on `http://localhost:8080`. The H2 console is available at `http://localhost:8080/h2-console` with JDBC URL `jdbc:h2:mem:testdb`, user `sa`, password blank.
 
-### Database Access
-- H2 Console: `http://localhost:8080/h2-console`
-- JDBC URL: `jdbc:h2:mem:testdb`
-- Username: `sa`
-- Password: `password`
+### Frontend
+```powershell
+cd C:\Users\P12C4F0\IdeaProjects\MyMovie\frontend
+npm install
+npm start
+```
+
+The React dev server runs on `http://localhost:3000`.
 
 ## Testing
-
-The application follows TDD approach with comprehensive test coverage:
-
-### Unit Tests
-- Service layer tests with Mockito
-- Repository layer tests
-- Controller layer tests with MockMvc
-
-### Running Tests
-```bash
+```powershell
+cd C:\Users\P12C4F0\IdeaProjects\MyMovie
 mvn test
 ```
 
-## Key Features Implemented
+## Seeded Demo Data
+- Users: `admin123` (ADMIN), `customer123` (CUSTOMER)
+- Customers: John Doe, Jane Smith, Demo User
+- Movies: Avengers: Endgame, Inception, The Dark Knight
+- Theatres: PVR Cinemas (Mumbai), INOX (Delhi)
+- Shows: Three future-dated shows mapped to the seeded movies
+- Seats: Premium (A1, A2) and Regular (B1, B2) with prices
 
-1. **Modular Architecture** - Clean separation of concerns
-2. **Security** - JWT-based authentication and authorization
-3. **Data Validation** - Input validation with Bean Validation
-4. **Error Handling** - Centralized exception handling
-5. **Responsive UI** - Mobile-friendly React interface
-6. **Real-time Updates** - Dynamic seat selection and booking
-7. **Role-based Access** - Different interfaces for customers and admins
-8. **Data Persistence** - JPA entities with proper relationships
-9. **Seat Conflict Prevention** - Server-side validation to prevent double booking
-10. **Movie Analytics** - Booking summary endpoint grouped by movie
-
-## Default Test Data
-
-The application initializes with sample data:
-- Admin user (ID: 1, password: admin123)
-- Customer user (ID: 2, password: customer123)
-- Sample movies (Avengers, Inception, The Dark Knight)
-- Sample theatres (PVR Cinemas Mumbai, INOX Delhi)
-- Sample customers and seats
-
-## Future Enhancements
-
-- Payment gateway integration
-- Email notifications
-- Advanced seat selection with pricing tiers
-- Movie recommendations
-- Reviews and ratings
-- Mobile application
-- Integration with external movie databases
-
-This comprehensive Movie Ticket Booking Application demonstrates modern web development practices with a full-stack implementation following industry standards and best practices.
+This README is intentionally limited to shipped functionality so it stays accurate as the project evolves.
