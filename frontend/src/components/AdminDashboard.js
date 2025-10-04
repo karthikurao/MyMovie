@@ -8,7 +8,6 @@ function AdminDashboard() {
   const [theatres, setTheatres] = useState([]);
   const [shows, setShows] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
@@ -29,19 +28,17 @@ function AdminDashboard() {
     try {
       setLoading(true);
       setError('');
-      const [moviesRes, theatresRes, showsRes, bookingsRes, customersRes] = await Promise.all([
+      const [moviesRes, theatresRes, showsRes, bookingsRes] = await Promise.all([
         axios.get('/api/movies', { timeout: 10000 }),
         axios.get('/api/theatres', { timeout: 10000 }),
         axios.get('/api/shows', { timeout: 10000 }),
-        axios.get('/api/bookings', { timeout: 10000 }),
-        axios.get('/api/customers', { timeout: 10000 }).catch(() => ({ data: [] }))
+        axios.get('/api/bookings', { timeout: 10000 })
       ]);
 
       setMovies(moviesRes.data || []);
       setTheatres(theatresRes.data || []);
       setShows(showsRes.data || []);
       setBookings(bookingsRes.data || []);
-      setCustomers(customersRes.data || []);
     } catch (err) {
       console.error('Error fetching admin data:', err);
       if (err.code === 'ECONNABORTED') {
@@ -88,6 +85,8 @@ function AdminDashboard() {
           break;
         case 'booking':
           setBookings(bookings.filter(b => (b.bookingId || b.ticketId) !== (item.bookingId || item.ticketId)));
+          break;
+        default:
           break;
       }
 

@@ -49,9 +49,12 @@ function Shows() {
     }
   };
 
+  const selectedTheatreId = selectedTheatre ? Number(selectedTheatre) : null;
+  const selectedMovieId = selectedMovie ? Number(selectedMovie) : null;
+
   const filteredShows = shows.filter(show => {
-    return (!selectedTheatre || show.theatreId == selectedTheatre) &&
-           (!selectedMovie || show.movieId == selectedMovie);
+    return (selectedTheatreId === null || show.theatreId === selectedTheatreId) &&
+           (selectedMovieId === null || show.movieId === selectedMovieId);
   });
 
   const handleBookTicket = (showId) => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Button, Alert, Spinner, Container, Badge } from 'react-bootstrap';
+import { Row, Col, Card, Button, Alert, Container } from 'react-bootstrap';
 import axios from 'axios';
 
 function Movies() {

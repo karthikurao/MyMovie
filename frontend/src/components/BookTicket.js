@@ -1,7 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Button, Alert, Form, Modal, Container, Badge } from 'react-bootstrap';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Row, Col, Card, Button, Alert, Modal, Container, Badge } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+
+const SEAT_PRICES = {
+  A: 400,
+  B: 300,
+  C: 250
+};
+
+const SEAT_ROWS = ['A', 'B', 'C', 'D'];
+const SEATS_PER_ROW = 8;
+const MOCK_OCCUPIED_SEATS = ['A2', 'A5', 'B3', 'C1', 'C7'];
 
 function BookTicket() {
   const { showId } = useParams();
@@ -13,49 +23,28 @@ function BookTicket() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [bookingSuccess, setBookingSuccess] = useState(false);
   const navigate = useNavigate();
 
-  const seatPrices = {
-    'A': 400, // Premium seats
-    'B': 300, // Regular seats
-    'C': 250, // Economy seats
-  };
-
-  const seatRows = ['A', 'B', 'C', 'D'];
-  const seatsPerRow = 8;
-  const occupiedSeats = ['A2', 'A5', 'B3', 'C1', 'C7']; // Mock occupied seats
-
-  useEffect(() => {
-    fetchShowDetails();
-  }, [showId]);
-
-  useEffect(() => {
-    const cost = selectedSeats.reduce((total, seat) => {
-      const row = seat.charAt(0);
-      return total + (seatPrices[row] || seatPrices['C']);
-    }, 0);
-    setTotalCost(cost);
-  }, [selectedSeats]);
-
-  const fetchShowDetails = async () => {
+  const fetchShowDetails = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
 
-      // Fetch show details
       const showResponse = await axios.get(`/api/shows/${showId}`, { timeout: 10000 });
       setShow(showResponse.data);
 
-      // Fetch related movie and theatre details
       if (showResponse.data.movieId) {
         const movieResponse = await axios.get(`/api/movies/${showResponse.data.movieId}`);
         setMovie(movieResponse.data);
+      } else {
+        setMovie(null);
       }
 
       if (showResponse.data.theatreId) {
         const theatreResponse = await axios.get(`/api/theatres/${showResponse.data.theatreId}`);
         setTheatre(theatreResponse.data);
+      } else {
+        setTheatre(null);
       }
     } catch (err) {
       console.error('Error fetching show details:', err);
@@ -69,10 +58,21 @@ function BookTicket() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showId]);
 
+  useEffect(() => {
+    fetchShowDetails();
+  }, [fetchShowDetails]);
+
+  useEffect(() => {
+    const cost = selectedSeats.reduce((total, seat) => {
+      const row = seat.charAt(0);
+      return total + (SEAT_PRICES[row] ?? SEAT_PRICES.C);
+    }, 0);
+    setTotalCost(cost);
+  }, [selectedSeats]);
   const handleSeatToggle = (seat) => {
-    if (occupiedSeats.includes(seat)) return; // Can't select occupied seats
+    if (MOCK_OCCUPIED_SEATS.includes(seat)) return; // Can't select occupied seats
 
     setSelectedSeats(prev =>
       prev.includes(seat)
@@ -82,14 +82,14 @@ function BookTicket() {
   };
 
   const getSeatStatus = (seat) => {
-    if (occupiedSeats.includes(seat)) return 'occupied';
+    if (MOCK_OCCUPIED_SEATS.includes(seat)) return 'occupied';
     if (selectedSeats.includes(seat)) return 'selected';
     return 'available';
   };
 
   const getSeatPrice = (seat) => {
     const row = seat.charAt(0);
-    return seatPrices[row] || seatPrices['C'];
+    return SEAT_PRICES[row] ?? SEAT_PRICES.C;
   };
 
   const handleBooking = async () => {
@@ -114,7 +114,6 @@ function BookTicket() {
       };
 
       await axios.post('/api/bookings', bookingData);
-      setBookingSuccess(true);
       setShowModal(true);
     } catch (err) {
       setError('Booking failed. Please try again.');
@@ -239,7 +238,7 @@ function BookTicket() {
 
           {/* Seat Map */}
           <div className="seat-map">
-            {seatRows.map(row => (
+            {SEAT_ROWS.map(row => (
               <div key={row} className="seat-row mb-3">
                 <Row className="justify-content-center align-items-center">
                   <Col xs="auto">
@@ -247,7 +246,7 @@ function BookTicket() {
                   </Col>
                   <Col xs="auto">
                     <div className="d-flex gap-2">
-                      {Array.from({ length: seatsPerRow }, (_, i) => {
+                      {Array.from({ length: SEATS_PER_ROW }, (_, i) => {
                         const seatNumber = `${row}${i + 1}`;
                         const status = getSeatStatus(seatNumber);
                         const price = getSeatPrice(seatNumber);
@@ -284,7 +283,7 @@ function BookTicket() {
                     </div>
                   </Col>
                   <Col xs="auto">
-                    <Badge bg="outline-secondary">₹{seatPrices[row]}</Badge>
+                    <Badge bg="outline-secondary">₹{SEAT_PRICES[row] ?? SEAT_PRICES.C}</Badge>
                   </Col>
                 </Row>
               </div>
