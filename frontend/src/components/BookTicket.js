@@ -18,6 +18,7 @@ function BookTicket() {
   const [show, setShow] = useState(null);
   const [movie, setMovie] = useState(null);
   const [theatre, setTheatre] = useState(null);
+  const [customer, setCustomer] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [totalCost, setTotalCost] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -61,6 +62,36 @@ function BookTicket() {
   }, [showId]);
 
   useEffect(() => {
+    const verifyCustomer = async () => {
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+      if (!storedUser.userId) {
+        setError('Please sign in to book tickets.');
+        navigate('/login');
+        return;
+      }
+
+      if (storedUser.role !== 'CUSTOMER') {
+        setError('Only customer accounts can book tickets.');
+        navigate('/login');
+        return;
+      }
+
+      try {
+        const response = await axios.get(`/api/customers/${storedUser.userId}`, { timeout: 10000 });
+        setCustomer(response.data);
+      } catch (err) {
+        console.error('Unable to verify customer profile:', err);
+        setError('Your customer profile could not be found. Please sign in again.');
+        localStorage.removeItem('user');
+        navigate('/login');
+      }
+    };
+
+    verifyCustomer();
+  }, [navigate]);
+
+  useEffect(() => {
     fetchShowDetails();
   }, [fetchShowDetails]);
 
@@ -98,8 +129,8 @@ function BookTicket() {
       return;
     }
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (!user.userId) {
+    if (!customer) {
+      setError('Unable to verify your customer profile. Please sign in again.');
       navigate('/login');
       return;
     }
@@ -107,7 +138,7 @@ function BookTicket() {
     try {
       const bookingData = {
         showId: parseInt(showId),
-        customerId: user.userId,
+        customerId: customer.customerId,
         seatNumbers: selectedSeats,
         totalCost: totalCost,
         bookingDate: new Date().toISOString().split('T')[0]
@@ -173,10 +204,10 @@ function BookTicket() {
       {/* Show Information Card */}
       <Card className="mb-5 shadow-sm" style={{ borderRadius: '15px', border: 'none' }}>
         <Card.Header className="bg-gradient text-white py-4"
-                    style={{
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      borderRadius: '15px 15px 0 0'
-                    }}>
+          style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '15px 15px 0 0'
+          }}>
           <Row className="align-items-center">
             <Col md={8}>
               <h4 className="mb-1">{movie ? movie.movieName : 'Movie Details'}</h4>
@@ -268,10 +299,10 @@ function BookTicket() {
                               cursor: status === 'occupied' ? 'not-allowed' : 'pointer',
                               backgroundColor:
                                 status === 'selected' ? '#667eea' :
-                                status === 'occupied' ? '#dc3545' : '#e9ecef',
+                                  status === 'occupied' ? '#dc3545' : '#e9ecef',
                               color:
                                 status === 'selected' ? 'white' :
-                                status === 'occupied' ? 'white' : '#495057',
+                                  status === 'occupied' ? 'white' : '#495057',
                               transition: 'all 0.3s ease',
                               transform: status === 'selected' ? 'scale(1.1)' : 'scale(1)'
                             }}
