@@ -1,5 +1,19 @@
 package com.moviebooking.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.MockitoAnnotations;
+
 import com.moviebooking.dto.BookingRequest;
 import com.moviebooking.dto.MovieBookingSummary;
 import com.moviebooking.entity.Customer;
@@ -8,20 +22,6 @@ import com.moviebooking.repository.IBookingRepository;
 import com.moviebooking.repository.ICustomerRepository;
 import com.moviebooking.repository.IShowRepository;
 import com.moviebooking.service.impl.BookingServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class BookingServiceTest {
 
