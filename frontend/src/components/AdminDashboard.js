@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Button, Alert, Table, Tab, Tabs, Container, Badge, Modal } from 'react-bootstrap';
+import { Row, Col, Card, Button, Alert, Table, Tab, Tabs, Container, Badge, Modal, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -13,6 +13,15 @@ function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
+  const [showMovieModal, setShowMovieModal] = useState(false);
+  const [editingMovie, setEditingMovie] = useState(null);
+  const [movieForm, setMovieForm] = useState({
+    movieName: '',
+    movieGenre: '',
+    movieHours: '',
+    language: '',
+    description: ''
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -94,6 +103,65 @@ function AdminDashboard() {
       setDeleteItem(null);
     } catch (err) {
       alert(`Failed to delete ${deleteItem.type}.`);
+    }
+  };
+
+  const handleMovieFormChange = (e) => {
+    setMovieForm({
+      ...movieForm,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleAddMovie = () => {
+    setEditingMovie(null);
+    setMovieForm({
+      movieName: '',
+      movieGenre: '',
+      movieHours: '',
+      language: '',
+      description: ''
+    });
+    setShowMovieModal(true);
+  };
+
+  const handleEditMovie = (movie) => {
+    setEditingMovie(movie);
+    setMovieForm({
+      movieName: movie.movieName || '',
+      movieGenre: movie.movieGenre || '',
+      movieHours: movie.movieHours || '',
+      language: movie.language || '',
+      description: movie.description || ''
+    });
+    setShowMovieModal(true);
+  };
+
+  const handleMovieSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      let response;
+      if (editingMovie) {
+        // Update existing movie
+        response = await axios.put(`/api/movies/${editingMovie.movieId}`, movieForm);
+        setMovies(movies.map(m => m.movieId === editingMovie.movieId ? response.data : m));
+      } else {
+        // Add new movie
+        response = await axios.post('/api/movies', movieForm);
+        setMovies([...movies, response.data]);
+      }
+      setShowMovieModal(false);
+      setEditingMovie(null);
+      setMovieForm({
+        movieName: '',
+        movieGenre: '',
+        movieHours: '',
+        language: '',
+        description: ''
+      });
+    } catch (err) {
+      console.error('Error saving movie:', err);
+      alert('Failed to save movie. Please try again.');
     }
   };
 
@@ -227,7 +295,7 @@ function AdminDashboard() {
             <div className="p-4">
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <h5>Manage Movies</h5>
-                <Button variant="primary" style={{ borderRadius: '10px' }}>
+                <Button variant="primary" style={{ borderRadius: '10px' }} onClick={handleAddMovie}>
                   ➕ Add Movie
                 </Button>
               </div>
@@ -257,7 +325,12 @@ function AdminDashboard() {
                         <td>{movie.movieHours}</td>
                         <td>
                           <div className="d-flex gap-1">
-                            <Button variant="outline-primary" size="sm" style={{ borderRadius: '8px' }}>
+                            <Button 
+                              variant="outline-primary" 
+                              size="sm" 
+                              style={{ borderRadius: '8px' }}
+                              onClick={() => handleEditMovie(movie)}
+                            >
                               ✏️ Edit
                             </Button>
                             <Button
@@ -449,6 +522,117 @@ function AdminDashboard() {
           </Tab>
         </Tabs>
       </Card>
+
+      {/* Movie Form Modal */}
+      <Modal show={showMovieModal} onHide={() => setShowMovieModal(false)} size="lg" centered>
+        <Modal.Header closeButton style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+          <Modal.Title>{editingMovie ? '✏️ Edit Movie' : '➕ Add Movie'}</Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleMovieSubmit}>
+          <Modal.Body className="p-4">
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Movie Name *</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="movieName"
+                    value={movieForm.movieName}
+                    onChange={handleMovieFormChange}
+                    required
+                    placeholder="Enter movie name"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Genre *</Form.Label>
+                  <Form.Select
+                    name="movieGenre"
+                    value={movieForm.movieGenre}
+                    onChange={handleMovieFormChange}
+                    required
+                  >
+                    <option value="">Select Genre</option>
+                    <option value="Action">Action</option>
+                    <option value="Adventure">Adventure</option>
+                    <option value="Animation">Animation</option>
+                    <option value="Comedy">Comedy</option>
+                    <option value="Crime">Crime</option>
+                    <option value="Drama">Drama</option>
+                    <option value="Fantasy">Fantasy</option>
+                    <option value="Horror">Horror</option>
+                    <option value="Romance">Romance</option>
+                    <option value="Sci-Fi">Sci-Fi</option>
+                    <option value="Thriller">Thriller</option>
+                    <option value="War">War</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Duration *</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="movieHours"
+                    value={movieForm.movieHours}
+                    onChange={handleMovieFormChange}
+                    required
+                    placeholder="e.g., 2h 30m"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Language *</Form.Label>
+                  <Form.Select
+                    name="language"
+                    value={movieForm.language}
+                    onChange={handleMovieFormChange}
+                    required
+                  >
+                    <option value="">Select Language</option>
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="Tamil">Tamil</option>
+                    <option value="Telugu">Telugu</option>
+                    <option value="Malayalam">Malayalam</option>
+                    <option value="Kannada">Kannada</option>
+                    <option value="Bengali">Bengali</option>
+                    <option value="Marathi">Marathi</option>
+                    <option value="Punjabi">Punjabi</option>
+                    <option value="Korean">Korean</option>
+                    <option value="Japanese">Japanese</option>
+                    <option value="French">French</option>
+                    <option value="Spanish">Spanish</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
+            <Form.Group className="mb-3">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                name="description"
+                value={movieForm.description}
+                onChange={handleMovieFormChange}
+                placeholder="Enter movie description"
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowMovieModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" type="submit">
+              {editingMovie ? 'Update Movie' : 'Add Movie'}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>

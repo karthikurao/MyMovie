@@ -229,6 +229,13 @@ function Home() {
                 className="hero-thumbnail-image"
                 loading="lazy"
                 decoding="async"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.parentElement.style.background = `linear-gradient(135deg, ${slide.accent}, #333)`;
+                }}
+                onLoad={(e) => {
+                  e.target.style.display = 'block';
+                }}
               />
               <span
                 className="hero-thumbnail-overlay"

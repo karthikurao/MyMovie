@@ -38,6 +38,9 @@ function Login() {
       if (response.data && response.data.success) {
         localStorage.setItem('user', JSON.stringify(response.data));
 
+        // Trigger user update event for Navigation component
+        window.dispatchEvent(new CustomEvent('userUpdate'));
+
         // Redirect based on user role
         if (response.data.role === 'ADMIN') {
           navigate('/admin-dashboard');
@@ -64,7 +67,7 @@ function Login() {
   };
 
   return (
-    <div style={{ 
+    <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       display: 'flex',
@@ -75,16 +78,16 @@ function Login() {
       <Container>
         <Row className="justify-content-center">
           <Col md={6} lg={5} xl={4}>
-            <Card 
+            <Card
               className="modern-card shadow-lg border-0 animate-fade-in"
-              style={{ 
+              style={{
                 borderRadius: '25px',
                 background: 'rgba(255, 255, 255, 0.95)',
                 backdropFilter: 'blur(20px)',
                 boxShadow: '0 20px 60px rgba(0, 0, 0, 0.2)'
               }}
             >
-              <Card.Header 
+              <Card.Header
                 className="text-center py-4 border-0"
                 style={{
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -93,8 +96,8 @@ function Login() {
                 }}
               >
                 <div className="mb-3">
-                  <span 
-                    style={{ 
+                  <span
+                    style={{
                       fontSize: '3rem',
                       display: 'block',
                       animation: 'float 3s ease-in-out infinite'
@@ -106,11 +109,11 @@ function Login() {
                 <h3 className="mb-0 fw-bold">Welcome Back!</h3>
                 <p className="mb-0 mt-2 opacity-75">Sign in to your account</p>
               </Card.Header>
-              
+
               <Card.Body className="p-4">
                 {error && (
-                  <Alert 
-                    variant="danger" 
+                  <Alert
+                    variant="danger"
                     className="mb-3 alert-modern border-0"
                     style={{
                       background: 'linear-gradient(135deg, #ff6b6b, #ff8e8e)',
@@ -201,8 +204,8 @@ function Login() {
                   >
                     {loading ? (
                       <>
-                        <span 
-                          className="spinner-border spinner-border-sm me-2" 
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
                           style={{ width: '1rem', height: '1rem' }}
                         ></span>
                         Signing In...
@@ -220,10 +223,10 @@ function Login() {
                   <hr className="my-4" />
                   <p className="text-muted mb-0">
                     Don't have an account?{' '}
-                    <Link 
-                      to="/register" 
+                    <Link
+                      to="/register"
                       className="text-decoration-none fw-bold"
-                      style={{ 
+                      style={{
                         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent'

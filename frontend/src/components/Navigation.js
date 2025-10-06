@@ -7,25 +7,55 @@ function Navigation() {
 	const [isScrolled, setIsScrolled] = useState(false);
 
 	useEffect(() => {
-		try {
-			const storedUser = localStorage.getItem('user');
-			if (storedUser) {
-				setUser(JSON.parse(storedUser));
+		const loadUserData = () => {
+			try {
+				const storedUser = localStorage.getItem('user');
+				if (storedUser) {
+					const userData = JSON.parse(storedUser);
+					console.log('Loaded user data:', userData); // Debug log
+					setUser(userData);
+				}
+			} catch (error) {
+				console.error('Error loading user data:', error);
+				setUser(null);
 			}
-		} catch (error) {
-			setUser(null);
-		}
+		};
+
+		// Initial load
+		loadUserData();
+
+		// Listen for storage changes (when user logs in/out in another tab)
+		const handleStorageChange = (e) => {
+			if (e.key === 'user') {
+				loadUserData();
+			}
+		};
+
+		window.addEventListener('storage', handleStorageChange);
+
+		// Also listen for custom user update events
+		const handleUserUpdate = () => {
+			loadUserData();
+		};
+
+		window.addEventListener('userUpdate', handleUserUpdate);
 
 		const handleScroll = () => {
 			setIsScrolled(window.scrollY > 50);
 		};
 
 		window.addEventListener('scroll', handleScroll, { passive: true });
-		return () => window.removeEventListener('scroll', handleScroll);
+
+		return () => {
+			window.removeEventListener('storage', handleStorageChange);
+			window.removeEventListener('userUpdate', handleUserUpdate);
+			window.removeEventListener('scroll', handleScroll);
+		};
 	}, []);
 
 	const handleLogout = () => {
 		localStorage.removeItem('user');
+		setUser(null);
 		window.location.href = '/';
 	};
 
@@ -34,6 +64,16 @@ function Navigation() {
 		borderBottom: isScrolled
 			? '1px solid rgba(102, 126, 234, 0.25)'
 			: '1px solid rgba(255, 255, 255, 0.2)',
+	};
+
+	const getUserDisplayName = () => {
+		if (!user) return 'Guest';
+		return user.name || user.firstName || user.username || user.email || 'User';
+	};
+
+	const getUserRole = () => {
+		if (!user || !user.role) return 'Guest';
+		return user.role;
 	};
 
 	return (
@@ -75,13 +115,13 @@ function Navigation() {
 						{user && user.userId ? (
 							<>
 								{user.role === 'ADMIN' && (
-									<LinkContainer to="/admin">
+									<LinkContainer to="/admin-dashboard">
 										<Nav.Link>Admin</Nav.Link>
 									</LinkContainer>
 								)}
 
 								{user.role === 'CUSTOMER' && (
-									<LinkContainer to="/customer">
+									<LinkContainer to="/customer-dashboard">
 										<Nav.Link>Dashboard</Nav.Link>
 									</LinkContainer>
 								)}
@@ -96,19 +136,17 @@ function Navigation() {
 									<span style={{ fontSize: '1.25rem' }}>👋</span>
 									<div className="d-flex flex-column">
 										<span className="fw-semibold" style={{ fontSize: '0.9rem' }}>
-											{user.firstName || user.username || 'Guest'}
+											{getUserDisplayName()}
 										</span>
-										{user.email && (
+										{user && user.email && (
 											<span className="text-muted" style={{ fontSize: '0.75rem' }}>
 												{user.email}
 											</span>
 										)}
 									</div>
-									{user.role && (
-										<Badge bg="light" text="dark" className="text-uppercase" style={{ fontSize: '0.65rem' }}>
-											{user.role}
-										</Badge>
-									)}
+									<Badge bg="light" text="dark" className="text-uppercase" style={{ fontSize: '0.65rem' }}>
+										{getUserRole()}
+									</Badge>
 								</div>
 
 								<Button
