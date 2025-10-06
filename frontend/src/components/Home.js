@@ -121,12 +121,11 @@ function Home() {
             <h1 className="hero-title" style={{
               fontSize: 'clamp(3rem, 8vw, 6rem)',
               fontWeight: '900',
-              background: `linear-gradient(45deg, #fff, ${currentHero.accent})`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+              color: 'white',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.7)',
               marginBottom: '1.5rem',
-              animation: 'glow 3s ease-in-out infinite alternate'
+              background: 'none',
+              filter: 'none'
             }}>
               {currentHero.title}
             </h1>
@@ -189,7 +188,6 @@ function Home() {
                     letterSpacing: '1px',
                     borderWidth: '2px',
                     transition: 'all 0.3s ease',
-                    backdropFilter: 'blur(10px)',
                     background: 'rgba(255, 255, 255, 0.1)'
                   }}
                 >
