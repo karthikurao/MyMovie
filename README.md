@@ -88,10 +88,20 @@ cd C:\Users\P12C4F0\IdeaProjects\MyMovie
 mvn test
 ```
 
-## Seeded Demo Data
-- Users: `admin123` (ADMIN), `customer123` (CUSTOMER)
-- Customers: John Doe, Jane Smith, Demo User
-- Movies: Avengers: Endgame, Inception, The Dark Knight
+## Seeded Demo Data & Login Credentials
+
+### Admin Login
+- **Email**: `admin@mymovie.com`
+- **Password**: `admin123`
+- **Role**: ADMIN
+
+### Customer Logins
+- **John Doe**: `john@mymovie.com` / `password123`
+- **Jane Smith**: `jane@mymovie.com` / `password123`  
+- **Demo User**: `demo@mymovie.com` / `demo123`
+
+### Other Seeded Data
+- Movies: 24 movies including Avengers: Endgame, Inception, The Dark Knight, Interstellar, Spider-Man: No Way Home, etc.
 - Theatres: PVR Cinemas (Mumbai), INOX (Delhi)
 - Shows: Three future-dated shows mapped to the seeded movies
 - Seats: Premium (A1, A2) and Regular (B1, B2) with prices

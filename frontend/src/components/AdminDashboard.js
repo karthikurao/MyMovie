@@ -325,9 +325,9 @@ function AdminDashboard() {
                         <td>{movie.movieHours}</td>
                         <td>
                           <div className="d-flex gap-1">
-                            <Button 
-                              variant="outline-primary" 
-                              size="sm" 
+                            <Button
+                              variant="outline-primary"
+                              size="sm"
                               style={{ borderRadius: '8px' }}
                               onClick={() => handleEditMovie(movie)}
                             >
