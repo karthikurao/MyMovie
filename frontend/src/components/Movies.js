@@ -343,7 +343,7 @@ function Movies() {
                   <div style={{ position: 'relative', overflow: 'hidden' }}>
                     <Card.Img
                       variant="top"
-                      src={getMoviePoster(movie.movieName, movie.movieGenre)}
+                      src={movie.imageUrl || getMoviePoster(movie.movieName, movie.movieGenre)}
                       style={{
                         height: '280px',
                         objectFit: 'cover',

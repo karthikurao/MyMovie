@@ -3,6 +3,12 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### SQLite Database ###
+*.db
+*.db-shm
+*.db-wal
+mymovie.db
+
 ### Node / React ###
 node_modules/
 frontend/node_modules/

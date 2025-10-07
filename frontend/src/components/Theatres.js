@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Alert, Spinner, Container, Badge, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function Theatres() {
   const [theatres, setTheatres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   // Theatre images for different cities/types
   const getTheatreImage = (theatreName, city) => {
@@ -148,7 +150,7 @@ function Theatres() {
                     <div className="mt-auto">
                       <Button
                         variant="primary"
-                        href={`/shows?theatreId=${theatre.theatreId}`}
+                        onClick={() => navigate(`/shows?theatreId=${theatre.theatreId}`)}
                         className="w-100"
                       >
                         🎫 View Shows

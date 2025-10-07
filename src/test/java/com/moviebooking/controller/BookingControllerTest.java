@@ -1,29 +1,29 @@
 package com.moviebooking.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.moviebooking.dto.BookingRequest;
-import com.moviebooking.dto.MovieBookingSummary;
-import com.moviebooking.entity.Ticket;
-import com.moviebooking.entity.TicketBooking;
-import com.moviebooking.service.IBookingService;
+import java.time.LocalDate;
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moviebooking.dto.BookingRequest;
+import com.moviebooking.dto.MovieBookingSummary;
+import com.moviebooking.entity.Ticket;
+import com.moviebooking.entity.TicketBooking;
+import com.moviebooking.service.IBookingService;
 
 @WebMvcTest(BookingController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -55,9 +55,9 @@ class BookingControllerTest {
 
         mockMvc.perform(get("/api/bookings")
                 .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].bookingId").value(booking.getBookingId()))
-            .andExpect(jsonPath("$[0].transactionStatus").value("CONFIRMED"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].bookingId").value(booking.getBookingId()))
+                .andExpect(jsonPath("$[0].transactionStatus").value("CONFIRMED"));
     }
 
     @Test
@@ -67,7 +67,7 @@ class BookingControllerTest {
 
         mockMvc.perform(get("/api/bookings")
                 .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isInternalServerError());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -104,9 +104,9 @@ class BookingControllerTest {
         mockMvc.perform(post("/api/bookings")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.bookingId").value(booking.getBookingId()))
-            .andExpect(jsonPath("$.transactionMode").value("UPI"));
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.bookingId").value(booking.getBookingId()))
+                .andExpect(jsonPath("$.transactionMode").value("UPI"));
     }
 
     @Test
@@ -119,13 +119,13 @@ class BookingControllerTest {
         request.setTotalCost(0.0);
 
         when(bookingService.addBooking(any(BookingRequest.class)))
-            .thenThrow(new IllegalArgumentException("At least one seat must be selected"));
+                .thenThrow(new IllegalArgumentException("At least one seat must be selected"));
 
         mockMvc.perform(post("/api/bookings")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.error").value("At least one seat must be selected"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("At least one seat must be selected"));
     }
 
     @Test
@@ -136,9 +136,9 @@ class BookingControllerTest {
 
         mockMvc.perform(get("/api/bookings/summary/movies")
                 .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].movieId").value(summary.getMovieId()))
-            .andExpect(jsonPath("$[0].totalBookings").value((int) summary.getTotalBookings()))
-            .andExpect(jsonPath("$[0].totalRevenue").value(summary.getTotalRevenue()));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].movieId").value(summary.getMovieId()))
+                .andExpect(jsonPath("$[0].totalBookings").value((int) summary.getTotalBookings()))
+                .andExpect(jsonPath("$[0].totalRevenue").value(summary.getTotalRevenue()));
     }
 }

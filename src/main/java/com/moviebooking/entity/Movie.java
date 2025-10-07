@@ -32,6 +32,9 @@ public class Movie {
     @Column(length = 1000)
     private String description;
 
+    @Column(length = 500)
+    private String imageUrl;
+
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"movie", "screen", "hibernateLazyInitializer", "handler"})
     private List<Show> shows;
@@ -45,6 +48,15 @@ public class Movie {
         this.movieHours = movieHours;
         this.language = language;
         this.description = description;
+    }
+
+    public Movie(String movieName, String movieGenre, String movieHours, String language, String description, String imageUrl) {
+        this.movieName = movieName;
+        this.movieGenre = movieGenre;
+        this.movieHours = movieHours;
+        this.language = language;
+        this.description = description;
+        this.imageUrl = imageUrl;
     }
 
     // Getters and Setters
@@ -94,6 +106,14 @@ public class Movie {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public List<Show> getShows() {

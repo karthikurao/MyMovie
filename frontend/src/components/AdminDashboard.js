@@ -20,7 +20,8 @@ function AdminDashboard() {
     movieGenre: '',
     movieHours: '',
     language: '',
-    description: ''
+    description: '',
+    imageUrl: ''
   });
   const navigate = useNavigate();
 
@@ -120,7 +121,8 @@ function AdminDashboard() {
       movieGenre: '',
       movieHours: '',
       language: '',
-      description: ''
+      description: '',
+      imageUrl: ''
     });
     setShowMovieModal(true);
   };
@@ -132,7 +134,8 @@ function AdminDashboard() {
       movieGenre: movie.movieGenre || '',
       movieHours: movie.movieHours || '',
       language: movie.language || '',
-      description: movie.description || ''
+      description: movie.description || '',
+      imageUrl: movie.imageUrl || ''
     });
     setShowMovieModal(true);
   };
@@ -157,7 +160,8 @@ function AdminDashboard() {
         movieGenre: '',
         movieHours: '',
         language: '',
-        description: ''
+        description: '',
+        imageUrl: ''
       });
     } catch (err) {
       console.error('Error saving movie:', err);
@@ -620,6 +624,16 @@ function AdminDashboard() {
                 value={movieForm.description}
                 onChange={handleMovieFormChange}
                 placeholder="Enter movie description"
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Image URL</Form.Label>
+              <Form.Control
+                type="text"
+                name="imageUrl"
+                value={movieForm.imageUrl}
+                onChange={handleMovieFormChange}
+                placeholder="Enter image URL"
               />
             </Form.Group>
           </Modal.Body>
