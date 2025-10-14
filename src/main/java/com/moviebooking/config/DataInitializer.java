@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.moviebooking.entity.Customer;
@@ -46,6 +47,9 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private IShowRepository showRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public void run(String... args) throws Exception {
         initializeData();
@@ -54,16 +58,16 @@ public class DataInitializer implements CommandLineRunner {
     private void initializeData() {
         // Initialize Users
         if (userRepository.count() == 0) {
-            User admin = new User("admin123", "ADMIN");
-            User customer = new User("customer123", "CUSTOMER");
-            userRepository.saveAll(Arrays.asList(admin, customer));
+            User admin = new User("admin@mymovie.com", passwordEncoder.encode("admin123"), "ADMIN");
+            User operationsUser = new User("ops@mymovie.com", passwordEncoder.encode("ops123"), "OPERATIONS");
+            userRepository.saveAll(Arrays.asList(admin, operationsUser));
         }
 
         // Initialize Customers
         if (customerRepository.count() == 0) {
-            Customer customer1 = new Customer("John Doe", "123 Main St, New York", "1234567890", "john@mymovie.com", "password123");
-            Customer customer2 = new Customer("Jane Smith", "456 Oak Ave, Los Angeles", "0987654321", "jane@mymovie.com", "password123");
-            Customer customer3 = new Customer("Demo User", "789 Demo Street, Demo City", "5555555555", "demo@mymovie.com", "demo123");
+            Customer customer1 = new Customer("John Doe", "123 Main St, New York", "1234567890", "john@mymovie.com", passwordEncoder.encode("password123"));
+            Customer customer2 = new Customer("Jane Smith", "456 Oak Ave, Los Angeles", "0987654321", "jane@mymovie.com", passwordEncoder.encode("password123"));
+            Customer customer3 = new Customer("Demo User", "789 Demo Street, Demo City", "5555555555", "demo@mymovie.com", passwordEncoder.encode("demo123"));
             customerRepository.saveAll(Arrays.asList(customer1, customer2, customer3));
         }
 

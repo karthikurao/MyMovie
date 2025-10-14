@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = "seats")
 public class Seat {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int seatId;
 
     @NotBlank(message = "Seat number is required")

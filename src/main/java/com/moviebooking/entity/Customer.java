@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Email;
 @Table(name = "customers")
 public class Customer {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int customerId;
 
     @NotBlank(message = "Customer name is required")

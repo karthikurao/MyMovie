@@ -1,12 +1,16 @@
 package com.moviebooking.repository;
 
-import com.moviebooking.entity.User;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.Optional;
+
+import com.moviebooking.entity.User;
 
 @Repository
 public interface IUserRepository extends JpaRepository<User, Integer> {
-    Optional<User> findByUserIdAndPassword(int userId, String password);
-    boolean existsByUserId(int userId);
+
+    Optional<User> findByEmail(String email);
+
+    boolean existsByEmail(String email);
 }

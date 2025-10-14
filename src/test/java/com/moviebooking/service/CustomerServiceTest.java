@@ -1,26 +1,37 @@
 package com.moviebooking.service;
 
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import com.moviebooking.entity.Customer;
 import com.moviebooking.repository.ICustomerRepository;
 import com.moviebooking.service.impl.CustomerServiceImpl;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
+@ExtendWith(MockitoExtension.class)
 @DisplayName("Customer Service Tests")
 public class CustomerServiceTest {
 
     @Mock
     private ICustomerRepository customerRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private CustomerServiceImpl customerService;
@@ -29,9 +40,8 @@ public class CustomerServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         testCustomer = new Customer("John Doe", "123 Main St", "1234567890",
-                                   "john@example.com", "password123");
+                "john@example.com", "password123");
         testCustomer.setCustomerId(1);
     }
 
@@ -40,7 +50,8 @@ public class CustomerServiceTest {
     void testAddCustomer_Success() {
         // Given
         when(customerRepository.existsByEmail(testCustomer.getEmail())).thenReturn(false);
-        when(customerRepository.save(testCustomer)).thenReturn(testCustomer);
+        when(passwordEncoder.encode("password123")).thenReturn("encodedPass");
+        when(customerRepository.save(any(Customer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
         Customer result = customerService.addCustomer(testCustomer);
@@ -49,7 +60,9 @@ public class CustomerServiceTest {
         assertNotNull(result);
         assertEquals(testCustomer.getCustomerName(), result.getCustomerName());
         assertEquals(testCustomer.getEmail(), result.getEmail());
-        verify(customerRepository).save(testCustomer);
+        assertEquals("encodedPass", result.getPassword());
+        verify(passwordEncoder).encode("password123");
+        verify(customerRepository).save(any(Customer.class));
     }
 
     @Test
@@ -60,7 +73,7 @@ public class CustomerServiceTest {
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-            () -> customerService.addCustomer(testCustomer));
+                () -> customerService.addCustomer(testCustomer));
 
         assertTrue(exception.getMessage().contains("already exists"));
         verify(customerRepository, never()).save(any());
@@ -70,16 +83,28 @@ public class CustomerServiceTest {
     @DisplayName("Should update customer successfully")
     void testUpdateCustomer_Success() {
         // Given
-        when(customerRepository.findById(testCustomer.getCustomerId())).thenReturn(Optional.of(testCustomer));
-        when(customerRepository.save(testCustomer)).thenReturn(testCustomer);
+        Customer persisted = new Customer("Jane Doe", "456 Oak Ave", "0987654321",
+                "jane@example.com", "$2a$10$abcdef");
+        persisted.setCustomerId(testCustomer.getCustomerId());
+
+        when(customerRepository.findById(testCustomer.getCustomerId())).thenReturn(Optional.of(persisted));
+        when(passwordEncoder.encode("password123")).thenReturn("reencoded");
+        when(customerRepository.save(any(Customer.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Customer updateRequest = new Customer("John Smith", "789 Pine Rd", "9998887777",
+                "john@example.com", "password123");
+        updateRequest.setCustomerId(testCustomer.getCustomerId());
 
         // When
-        Customer result = customerService.updateCustomer(testCustomer);
+        Customer result = customerService.updateCustomer(updateRequest);
 
         // Then
         assertNotNull(result);
-        assertEquals(testCustomer.getCustomerId(), result.getCustomerId());
-        verify(customerRepository).save(testCustomer);
+        assertEquals(updateRequest.getCustomerId(), result.getCustomerId());
+        assertEquals("reencoded", result.getPassword());
+        assertEquals("John Smith", result.getCustomerName());
+        verify(passwordEncoder).encode("password123");
+        verify(customerRepository).save(any(Customer.class));
     }
 
     @Test
@@ -90,7 +115,7 @@ public class CustomerServiceTest {
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-            () -> customerService.updateCustomer(testCustomer));
+                () -> customerService.updateCustomer(testCustomer));
 
         assertTrue(exception.getMessage().contains("not found"));
     }
@@ -117,7 +142,7 @@ public class CustomerServiceTest {
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-            () -> customerService.viewCustomer(1));
+                () -> customerService.viewCustomer(1));
 
         assertTrue(exception.getMessage().contains("not found"));
     }

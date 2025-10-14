@@ -10,7 +10,7 @@ import java.util.List;
 @JsonIgnoreProperties({"booking", "hibernateLazyInitializer", "handler"})
 public class Ticket {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int ticketId;
 
     @NotNull(message = "Number of seats is required")

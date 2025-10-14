@@ -6,13 +6,13 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.moviebooking.dto.BookingRequest;
 import com.moviebooking.dto.MovieBookingSummary;
@@ -23,7 +23,8 @@ import com.moviebooking.repository.ICustomerRepository;
 import com.moviebooking.repository.IShowRepository;
 import com.moviebooking.service.impl.BookingServiceImpl;
 
-public class BookingServiceTest {
+@ExtendWith(MockitoExtension.class)
+class BookingServiceTest {
 
     @Mock
     private IBookingRepository bookingRepository;
@@ -36,11 +37,6 @@ public class BookingServiceTest {
 
     @InjectMocks
     private BookingServiceImpl bookingService;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void testCalculateTotalCost_Success() {
@@ -97,27 +93,6 @@ public class BookingServiceTest {
         request.setShowId(2);
         request.setSeatNumbers(List.of("A1", "a1"));
         request.setTotalCost(500.0);
-
-        Customer customer = new Customer();
-        customer.setCustomerId(1);
-        customer.setCustomerName("Test User");
-        customer.setAddress("123 Street");
-        customer.setMobileNumber("9999999999");
-        customer.setEmail("test@example.com");
-        customer.setPassword("secret");
-
-        Show show = new Show();
-        show.setShowId(2);
-        show.setMovieId(5);
-        show.setShowName("Morning Show");
-        show.setShowStartTime(LocalDateTime.now());
-        show.setShowEndTime(LocalDateTime.now().plusHours(3));
-        show.setScreenId(1);
-        show.setTheatreId(1);
-
-        when(customerRepository.findById(1)).thenReturn(Optional.of(customer));
-        when(showRepository.findById(2)).thenReturn(Optional.of(show));
-        when(bookingRepository.findReservedSeatNumbersByShow(2)).thenReturn(List.of());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookingService.addBooking(request));
         assertEquals("Duplicate seats selected. Please review your selection.", exception.getMessage());

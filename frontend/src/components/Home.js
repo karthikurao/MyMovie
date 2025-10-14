@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Row, Col, Card, Button, Container } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
+import CinematicExperiences from './CinematicExperiences';
+import BookingJourney from './BookingJourney';
+import AudienceVoices from './AudienceVoices';
 
 const hexToRgba = (hex, alpha = 1) => {
   if (!hex) {
@@ -411,26 +414,34 @@ function Home() {
             </Card>
           </Col>
         </Row>
-
-        {/* Call to Action Section */}
-        <div className="cta-section">
-          <h2 className="display-5 mb-3">🌟 Join the MyMovie Family</h2>
-          <p className="lead mb-4">
-            Over 1 million movie lovers trust MyMovie for their entertainment needs.
-            Join them today and never miss a show!
-          </p>
-          <LinkContainer to="/register">
-            <Button variant="light" size="lg" className="me-3">
-              🚀 Sign Up Free
-            </Button>
-          </LinkContainer>
-          <LinkContainer to="/movies">
-            <Button variant="outline-light" size="lg">
-              🎭 Explore Movies
-            </Button>
-          </LinkContainer>
-        </div>
       </Container>
+
+      <CinematicExperiences />
+      <BookingJourney />
+      <AudienceVoices />
+
+      <section className="cta-section finale-cta text-center py-5">
+        <Container>
+          <h2 className="display-5 mb-3">🌟 Join the CinemaHub Collective</h2>
+          <p className="lead mb-4 mx-auto" style={{ maxWidth: '720px' }}>
+            We are crafting the future of moviegoing—hyper-personal, planet-conscious, and
+            community-fuelled. Reserve your spot, earn exclusive drops, and help us shape every
+            premiere night.
+          </p>
+          <div className="d-flex flex-wrap justify-content-center gap-3">
+            <LinkContainer to="/register">
+              <Button variant="light" size="lg" className="cta-primary-btn">
+                <span className="me-2">🚀</span>Become a Founder Member
+              </Button>
+            </LinkContainer>
+            <LinkContainer to="/movies">
+              <Button variant="outline-light" size="lg" className="cta-secondary-btn">
+                <span className="me-2">🎬</span>Preview Curated Lineups
+              </Button>
+            </LinkContainer>
+          </div>
+        </Container>
+      </section>
     </div>
   );
 }
