@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="velvet-bg" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2C003E"/>
+      <stop offset="100%" stop-color="#640D5F"/>
+    </linearGradient>
+    <linearGradient id="velvet-stage" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFE8F9" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#FFD5F0" stop-opacity="0.85"/>
+    </linearGradient>
+    <linearGradient id="velvet-seat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#570245"/>
+      <stop offset="100%" stop-color="#340029"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#velvet-bg)"/>
+  <path d="M140 360 Q400 310 660 360 L660 410 Q400 355 140 410 Z" fill="#200026" opacity="0.75"/>
+  <ellipse cx="400" cy="390" rx="260" ry="70" fill="#120014" opacity="0.55"/>
+  <rect x="150" y="120" width="500" height="210" rx="40" fill="#1E0022" opacity="0.45"/>
+  <rect x="180" y="150" width="440" height="180" rx="32" fill="url(#velvet-stage)"/>
+  <g opacity="0.35">
+    <circle cx="200" cy="110" r="30" fill="#FF86C8"/>
+    <circle cx="380" cy="70" r="25" fill="#FFB6E6"/>
+    <circle cx="580" cy="110" r="40" fill="#FF86C8"/>
+    <circle cx="640" cy="60" r="22" fill="#FFB6E6"/>
+  </g>
+  <g transform="translate(165,255)">
+    <g fill="url(#velvet-seat)" opacity="0.95">
+      <rect x="0" y="0" width="95" height="75" rx="20"/>
+      <rect x="110" y="0" width="95" height="75" rx="20"/>
+      <rect x="220" y="0" width="95" height="75" rx="20"/>
+      <rect x="330" y="0" width="95" height="75" rx="20"/>
+      <rect x="440" y="0" width="95" height="75" rx="20"/>
+    </g>
+    <g fill="#6A0C5A" opacity="0.9" transform="translate(50,55)">
+      <rect x="0" y="0" width="95" height="70" rx="18"/>
+      <rect x="110" y="0" width="95" height="70" rx="18"/>
+      <rect x="220" y="0" width="95" height="70" rx="18"/>
+      <rect x="330" y="0" width="95" height="70" rx="18"/>
+    </g>
+  </g>
+  <path d="M180 132 Q400 90 620 132" stroke="#FFBEE6" stroke-width="8" stroke-linecap="round" opacity="0.4"/>
+  <path d="M220 410 Q400 440 580 410" stroke="#3B0036" stroke-width="14" stroke-linecap="round" opacity="0.7"/>
+</svg>

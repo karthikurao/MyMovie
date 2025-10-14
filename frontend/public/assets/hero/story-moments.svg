@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="story-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#041C29"/>
+      <stop offset="100%" stop-color="#0A3A4A"/>
+    </linearGradient>
+    <radialGradient id="story-glow" cx="35%" cy="25%" r="65%">
+      <stop offset="0%" stop-color="#48C6EF" stop-opacity="0.85"/>
+      <stop offset="65%" stop-color="#48C6EF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="story-stage" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#E6FAFF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#BBF1FF" stop-opacity="0.6"/>
+    </linearGradient>
+    <linearGradient id="story-seat" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0C3140"/>
+      <stop offset="100%" stop-color="#031821"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#story-bg)"/>
+  <rect width="1920" height="1080" fill="url(#story-glow)"/>
+  <g fill="#A8F5FF" opacity="0.35">
+    <circle cx="260" cy="160" r="16"/>
+    <circle cx="540" cy="100" r="14"/>
+    <circle cx="890" cy="90" r="15"/>
+    <circle cx="1300" cy="140" r="18"/>
+    <circle cx="1600" cy="80" r="12"/>
+    <circle cx="1750" cy="150" r="15"/>
+  </g>
+  <rect x="500" y="250" width="920" height="440" rx="48" fill="#05212D" opacity="0.5"/>
+  <rect x="540" y="285" width="840" height="370" rx="38" fill="url(#story-stage)"/>
+  <rect x="570" y="325" width="780" height="140" rx="32" fill="#FFFFFF" opacity="0.12"/>
+  <g transform="translate(500,560)">
+    <g fill="url(#story-seat)" opacity="0.95">
+      <rect x="0" y="0" width="165" height="120" rx="32"/>
+      <rect x="185" y="0" width="165" height="120" rx="32"/>
+      <rect x="370" y="0" width="165" height="120" rx="32"/>
+      <rect x="555" y="0" width="165" height="120" rx="32"/>
+      <rect x="740" y="0" width="165" height="120" rx="32"/>
+    </g>
+    <g fill="#0F3C4F" opacity="0.88" transform="translate(70,92)">
+      <rect x="0" y="0" width="165" height="110" rx="30"/>
+      <rect x="185" y="0" width="165" height="110" rx="30"/>
+      <rect x="370" y="0" width="165" height="110" rx="30"/>
+      <rect x="555" y="0" width="165" height="110" rx="30"/>
+    </g>
+  </g>
+  <path d="M440 240 Q960 160 1480 240" stroke="#6EDEF5" stroke-width="16" stroke-linecap="round" opacity="0.35"/>
+  <ellipse cx="960" cy="890" rx="640" ry="150" fill="#031821" opacity="0.7"/>
+  <path d="M480 830 Q960 900 1440 830" stroke="#062833" stroke-width="26" stroke-linecap="round" opacity="0.65"/>
+</svg>

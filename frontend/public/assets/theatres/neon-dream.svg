@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="neon-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#08001A"/>
+      <stop offset="100%" stop-color="#32006B"/>
+    </linearGradient>
+    <linearGradient id="neon-stage" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F4F3FF"/>
+      <stop offset="100%" stop-color="#E3E1FF"/>
+    </linearGradient>
+    <linearGradient id="neon-seat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5900A0"/>
+      <stop offset="100%" stop-color="#2A0063"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#neon-bg)"/>
+  <g opacity="0.4" fill="none" stroke="#00F5F5" stroke-width="2">
+    <path d="M150 60 L650 60"/>
+    <path d="M120 100 Q400 40 680 100"/>
+    <path d="M100 140 Q400 80 700 140"/>
+  </g>
+  <rect x="150" y="130" width="500" height="210" rx="42" fill="#150036" opacity="0.55"/>
+  <rect x="180" y="160" width="440" height="180" rx="32" fill="url(#neon-stage)"/>
+  <g opacity="0.6" fill="#00F5F5">
+    <circle cx="190" cy="130" r="8"/>
+    <circle cx="610" cy="130" r="8"/>
+    <circle cx="250" cy="90" r="6"/>
+    <circle cx="550" cy="90" r="6"/>
+  </g>
+  <g transform="translate(160,260)">
+    <g fill="url(#neon-seat)" opacity="0.95">
+      <rect x="0" y="0" width="95" height="75" rx="22"/>
+      <rect x="115" y="0" width="95" height="75" rx="22"/>
+      <rect x="230" y="0" width="95" height="75" rx="22"/>
+      <rect x="345" y="0" width="95" height="75" rx="22"/>
+      <rect x="460" y="0" width="95" height="75" rx="22"/>
+    </g>
+    <g fill="#410082" opacity="0.9" transform="translate(45,55)">
+      <rect x="0" y="0" width="95" height="70" rx="20"/>
+      <rect x="115" y="0" width="95" height="70" rx="20"/>
+      <rect x="230" y="0" width="95" height="70" rx="20"/>
+      <rect x="345" y="0" width="95" height="70" rx="20"/>
+    </g>
+  </g>
+  <path d="M220 410 Q400 450 580 410" stroke="#140030" stroke-width="16" stroke-linecap="round" opacity="0.7"/>
+  <g opacity="0.25" fill="#FF6FE6">
+    <circle cx="160" cy="80" r="18"/>
+    <circle cx="640" cy="75" r="18"/>
+    <circle cx="710" cy="130" r="20"/>
+  </g>
+</svg>

@@ -33,22 +33,22 @@ function Home() {
 
   const heroSlides = useMemo(() => ([
     {
-      background: 'https://images.unsplash.com/photo-1489599856772-16c0924af999?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+      background: '/assets/hero/cinema-magic.svg',
       title: 'Experience Cinema Magic',
       subtitle: 'Book premium seats for the latest blockbusters',
-      accent: '#ff6b6b'
+      accent: '#5b8cff'
     },
     {
-      background: 'https://images.unsplash.com/photo-1596727147705-61a532a659bd?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+      background: '/assets/hero/luxury-lounge.svg',
       title: 'Luxury Movie Experience',
       subtitle: 'State-of-the-art theatres with Dolby Atmos',
-      accent: '#4ecdc4'
+      accent: '#ff8fb2'
     },
     {
-      background: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+      background: '/assets/hero/story-moments.svg',
       title: 'Your Story Begins Here',
       subtitle: 'Discover amazing movies and unforgettable moments',
-      accent: '#45b7d1'
+      accent: '#48c6ef'
     }
   ]), []);
 

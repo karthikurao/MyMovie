@@ -12,12 +12,12 @@ function Theatres() {
   // Theatre images for different cities/types
   const getTheatreImage = (theatreName, city) => {
     const theatreImages = [
-      'https://images.unsplash.com/photo-1489599856772-16c0924af999?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1596727147705-61a532a659bd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1485846234645-a62644f84728?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+      '/assets/theatres/aurora-lounge.svg',
+      '/assets/theatres/velvet-premiere.svg',
+      '/assets/theatres/celestial-screen.svg',
+      '/assets/theatres/regal-grand.svg',
+      '/assets/theatres/neon-dream.svg',
+      '/assets/theatres/platinum-suite.svg'
     ];
 
     const hash = (theatreName + city).split('').reduce((a, b) => a + b.charCodeAt(0), 0);
@@ -121,7 +121,7 @@ function Theatres() {
                     style={{ height: '250px', objectFit: 'cover' }}
                     alt={theatre.theatreName}
                     onError={(e) => {
-                      e.target.src = 'https://images.unsplash.com/photo-1489599856772-16c0924af999?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+                      e.target.src = '/assets/theatres/aurora-lounge.svg';
                     }}
                   />
                   <Card.Body className="d-flex flex-column">

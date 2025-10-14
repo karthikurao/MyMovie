@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="celestial-bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#022039"/>
+      <stop offset="100%" stop-color="#094067"/>
+    </linearGradient>
+    <radialGradient id="nebula" cx="65%" cy="20%" r="60%">
+      <stop offset="0%" stop-color="#3DA9FC" stop-opacity="0.85"/>
+      <stop offset="45%" stop-color="#3DA9FC" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#094067" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="celestial-stage" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#E3F2FF"/>
+      <stop offset="100%" stop-color="#C7E1FF"/>
+    </linearGradient>
+    <linearGradient id="celestial-seat" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#123659"/>
+      <stop offset="100%" stop-color="#061E32"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#celestial-bg)"/>
+  <rect width="800" height="500" fill="url(#nebula)"/>
+  <g fill="#FFFFFF" opacity="0.35">
+    <circle cx="120" cy="90" r="3"/>
+    <circle cx="200" cy="60" r="2"/>
+    <circle cx="650" cy="120" r="3"/>
+    <circle cx="580" cy="70" r="2"/>
+    <circle cx="360" cy="40" r="2"/>
+    <circle cx="720" cy="80" r="2"/>
+    <circle cx="300" cy="110" r="2"/>
+  </g>
+  <rect x="140" y="130" width="520" height="210" rx="38" fill="#071D31" opacity="0.5"/>
+  <rect x="170" y="160" width="460" height="180" rx="32" fill="url(#celestial-stage)"/>
+  <rect x="195" y="185" width="410" height="90" rx="26" fill="#FFFFFF" opacity="0.35"/>
+  <g transform="translate(160,260)">
+    <g fill="url(#celestial-seat)" opacity="0.95">
+      <rect x="0" y="0" width="100" height="75" rx="22"/>
+      <rect x="120" y="0" width="100" height="75" rx="22"/>
+      <rect x="240" y="0" width="100" height="75" rx="22"/>
+      <rect x="360" y="0" width="100" height="75" rx="22"/>
+      <rect x="480" y="0" width="100" height="75" rx="22"/>
+    </g>
+    <g fill="#0B2B45" opacity="0.9" transform="translate(50,55)">
+      <rect x="0" y="0" width="100" height="70" rx="20"/>
+      <rect x="120" y="0" width="100" height="70" rx="20"/>
+      <rect x="240" y="0" width="100" height="70" rx="20"/>
+      <rect x="360" y="0" width="100" height="70" rx="20"/>
+    </g>
+  </g>
+  <ellipse cx="400" cy="400" rx="300" ry="80" fill="#031627" opacity="0.65"/>
+  <path d="M200 125 Q400 80 600 125" stroke="#C7E1FF" stroke-width="7" stroke-linecap="round" opacity="0.45"/>
+</svg>
