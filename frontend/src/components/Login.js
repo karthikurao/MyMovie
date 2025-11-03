@@ -36,7 +36,24 @@ function Login() {
       });
 
       if (response.data && response.data.success) {
-        localStorage.setItem('user', JSON.stringify(response.data));
+        const {
+          expiresIn,
+          expiresAt,
+          refreshTokenExpiresIn,
+          refreshTokenExpiresAt,
+        } = response.data;
+        const now = Date.now();
+        const enhancedPayload = {
+          ...response.data,
+          expiresAt: typeof expiresAt === 'number'
+            ? expiresAt
+            : (typeof expiresIn === 'number' ? now + expiresIn : null),
+          refreshTokenExpiresAt: typeof refreshTokenExpiresAt === 'number'
+            ? refreshTokenExpiresAt
+            : (typeof refreshTokenExpiresIn === 'number' ? now + refreshTokenExpiresIn : null),
+        };
+
+        localStorage.setItem('user', JSON.stringify(enhancedPayload));
 
         // Trigger user update event for Navigation component
         window.dispatchEvent(new CustomEvent('userUpdate'));

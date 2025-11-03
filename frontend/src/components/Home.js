@@ -291,14 +291,14 @@ function Home() {
 
       <Container className="py-5">
         {/* Featured Movies Section */}
-        <div className="text-center mb-5">
+        <div className="text-center mb-5 page-heading-dark">
           <h2 className="display-4 mb-3">🎭 Featured Movies</h2>
           <p className="lead">Discover the latest blockbusters and timeless classics</p>
         </div>
 
         <Row className="mb-5">
           <Col md={4} className="mb-4">
-            <Card className="movie-card h-100">
+            <Card className="movie-card h-100 surface-dark">
               <Card.Img
                 variant="top"
                 src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -319,7 +319,7 @@ function Home() {
             </Card>
           </Col>
           <Col md={4} className="mb-4">
-            <Card className="movie-card h-100">
+            <Card className="movie-card h-100 surface-dark">
               <Card.Img
                 variant="top"
                 src="https://images.unsplash.com/photo-1485846234645-a62644f84728?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -340,7 +340,7 @@ function Home() {
             </Card>
           </Col>
           <Col md={4} className="mb-4">
-            <Card className="movie-card h-100">
+            <Card className="movie-card h-100 surface-dark">
               <Card.Img
                 variant="top"
                 src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"

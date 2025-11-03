@@ -86,7 +86,7 @@ function Theatres() {
 
   return (
     <Container className="py-5">
-      <div className="text-center mb-5">
+      <div className="text-center mb-5 page-heading-dark">
         <h1 className="display-4 mb-3">🏢 Premium Theatres</h1>
         <p className="lead">Experience movies in world-class theatres with luxury amenities</p>
       </div>
@@ -114,7 +114,7 @@ function Theatres() {
           <Row>
             {theatres.map((theatre) => (
               <Col key={theatre.theatreId} lg={4} md={6} className="mb-4">
-                <Card className="theatre-card h-100">
+                <Card className="theatre-card h-100 surface-dark">
                   <Card.Img
                     variant="top"
                     src={getTheatreImage(theatre.theatreName, theatre.theatreCity)}

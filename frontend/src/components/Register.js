@@ -63,6 +63,8 @@ function Register() {
       console.error('Registration error:', err);
       if (err.response && err.response.status === 400) {
         setError('Email already exists. Please use a different email address.');
+      } else if (err.response && err.response.status === 401) {
+        setError('Registration failed: authentication is required. Please try again or contact support.');
       } else if (err.code === 'ECONNABORTED') {
         setError('Request timeout. Please check if the backend server is running.');
       } else if (err.request) {
@@ -76,7 +78,7 @@ function Register() {
   };
 
   return (
-    <div style={{ 
+    <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       paddingTop: '90px',
@@ -85,7 +87,7 @@ function Register() {
       <Container>
         <Row className="justify-content-center">
           <Col lg={6} md={8}>
-            <Card 
+            <Card
               className="border-0"
               style={{
                 background: 'rgba(255, 255, 255, 0.95)',
@@ -100,7 +102,7 @@ function Register() {
                   <div className="mb-3">
                     <span style={{ fontSize: '4rem', display: 'block' }}>✨</span>
                   </div>
-                  <h2 className="mb-3" style={{ 
+                  <h2 className="mb-3" style={{
                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -114,8 +116,8 @@ function Register() {
                 </div>
 
                 {error && (
-                  <Alert 
-                    variant="danger" 
+                  <Alert
+                    variant="danger"
                     className="mb-4"
                     style={{
                       borderRadius: '15px',
@@ -342,8 +344,8 @@ function Register() {
                       disabled={loading}
                       size="lg"
                       style={{
-                        background: loading 
-                          ? 'linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%)' 
+                        background: loading
+                          ? 'linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%)'
                           : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                         border: 'none',
                         borderRadius: '15px',
@@ -381,9 +383,9 @@ function Register() {
 
                   <div className="text-center">
                     <p className="text-muted mb-2">Already have an account?</p>
-                    <Link 
-                      to="/login" 
-                      style={{ 
+                    <Link
+                      to="/login"
+                      style={{
                         color: '#667eea',
                         textDecoration: 'none',
                         fontWeight: '600',

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navbar, Nav, Container, Button, Badge } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
+import axios from 'axios';
 
 function Navigation() {
 	const [user, setUser] = useState(null);
@@ -12,8 +13,9 @@ function Navigation() {
 				const storedUser = localStorage.getItem('user');
 				if (storedUser) {
 					const userData = JSON.parse(storedUser);
-					console.log('Loaded user data:', userData); // Debug log
 					setUser(userData);
+				} else {
+					setUser(null);
 				}
 			} catch (error) {
 				console.error('Error loading user data:', error);
@@ -40,6 +42,14 @@ function Navigation() {
 
 		window.addEventListener('userUpdate', handleUserUpdate);
 
+		const handleSessionExpired = (event) => {
+			const detail = event?.detail;
+			const message = typeof detail === 'string' ? detail : detail?.message;
+			window.alert(message || 'Your session has expired. Please sign in again.');
+		};
+
+		window.addEventListener('sessionExpired', handleSessionExpired);
+
 		const handleScroll = () => {
 			setIsScrolled(window.scrollY > 50);
 		};
@@ -49,14 +59,31 @@ function Navigation() {
 		return () => {
 			window.removeEventListener('storage', handleStorageChange);
 			window.removeEventListener('userUpdate', handleUserUpdate);
+			window.removeEventListener('sessionExpired', handleSessionExpired);
 			window.removeEventListener('scroll', handleScroll);
 		};
 	}, []);
 
-	const handleLogout = () => {
-		localStorage.removeItem('user');
-		setUser(null);
-		window.location.href = '/';
+	const handleLogout = async () => {
+		const payload = {
+			email: user?.email,
+			userId: user?.userId,
+			role: user?.role,
+		};
+
+		try {
+			if (payload.email) {
+				await axios.post('/api/users/signout', payload, {
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+		} catch (logoutError) {
+			console.warn('Server sign-out failed', logoutError);
+		} finally {
+			localStorage.removeItem('user');
+			setUser(null);
+			window.location.href = '/';
+		}
 	};
 
 	const navbarStyle = {

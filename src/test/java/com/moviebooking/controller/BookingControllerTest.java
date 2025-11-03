@@ -19,10 +19,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moviebooking.config.JwtTokenProvider;
 import com.moviebooking.dto.BookingRequest;
 import com.moviebooking.dto.MovieBookingSummary;
 import com.moviebooking.entity.Ticket;
 import com.moviebooking.entity.TicketBooking;
+import com.moviebooking.repository.ICustomerRepository;
+import com.moviebooking.repository.IUserRepository;
 import com.moviebooking.service.IBookingService;
 
 @WebMvcTest(BookingController.class)
@@ -35,6 +38,15 @@ class BookingControllerTest {
 
     @MockBean
     private IBookingService bookingService;
+
+    @MockBean
+    private IUserRepository userRepository;
+
+    @MockBean
+    private ICustomerRepository customerRepository;
+
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
 
     @Autowired
     private ObjectMapper objectMapper;

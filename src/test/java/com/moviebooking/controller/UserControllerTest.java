@@ -1,5 +1,6 @@
 package com.moviebooking.controller;
 
+import java.time.Instant;
 import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
@@ -18,9 +19,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moviebooking.config.JwtTokenProvider;
 import com.moviebooking.entity.Customer;
+import com.moviebooking.entity.RefreshToken;
 import com.moviebooking.entity.User;
+import com.moviebooking.repository.ICustomerRepository;
+import com.moviebooking.repository.IUserRepository;
 import com.moviebooking.service.ICustomerService;
+import com.moviebooking.service.IRefreshTokenService;
 import com.moviebooking.service.IUserService;
 
 @WebMvcTest(UserController.class)
@@ -37,6 +43,20 @@ class UserControllerTest {
     @MockBean
     private ICustomerService customerService;
 
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
+
+    @MockBean
+    private IRefreshTokenService refreshTokenService;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private IUserRepository userRepository;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private ICustomerRepository customerRepository;
+
     private static final String SAMPLE_EMAIL = "jane.doe@example.com";
     private static final String SAMPLE_PASSWORD = "secret123";
 
@@ -49,6 +69,17 @@ class UserControllerTest {
         admin.setRole("ADMIN");
         admin.setEmail(SAMPLE_EMAIL);
         return admin;
+    }
+
+    private RefreshToken buildRefreshToken(String subject, String role) {
+        RefreshToken token = new RefreshToken();
+        token.setToken("refresh-token-" + role.toLowerCase());
+        token.setSubject(subject);
+        token.setRole(role);
+        token.setCreatedAt(Instant.now());
+        token.setExpiresAt(Instant.now().plusSeconds(604800));
+        token.setRevoked(false);
+        return token;
     }
 
     @Test
@@ -83,12 +114,19 @@ class UserControllerTest {
     void signInLegacyReturnsOk() throws Exception {
         User sampleUser = buildSampleAdmin();
         when(userService.signIn(any(User.class))).thenReturn(sampleUser);
+        when(jwtTokenProvider.generateToken(eq(SAMPLE_EMAIL), eq(sampleUser.getRole()))).thenReturn("mock-token");
+        when(jwtTokenProvider.getExpirationMillis()).thenReturn(3600_000L);
+        when(refreshTokenService.createToken(eq(SAMPLE_EMAIL), eq(sampleUser.getRole()))).thenReturn(buildRefreshToken(SAMPLE_EMAIL, sampleUser.getRole()));
+        when(refreshTokenService.getRefreshTokenValidityMillis()).thenReturn(604800_000L);
 
         mockMvc.perform(post("/api/users/signin-legacy")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(sampleUser)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId").value(sampleUser.getUserId()));
+                .andExpect(jsonPath("$.userId").value(sampleUser.getUserId()))
+                .andExpect(jsonPath("$.token").value("mock-token"))
+                .andExpect(jsonPath("$.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.refreshToken").value("refresh-token-admin"));
     }
 
     @Test
@@ -111,6 +149,10 @@ class UserControllerTest {
                 .thenReturn(null);
         when(userService.signInByCredentials(eq(SAMPLE_EMAIL), eq(SAMPLE_PASSWORD)))
                 .thenReturn(sampleUser);
+        when(jwtTokenProvider.generateToken(eq(SAMPLE_EMAIL), eq(sampleUser.getRole()))).thenReturn("mock-token");
+        when(jwtTokenProvider.getExpirationMillis()).thenReturn(3600_000L);
+        when(refreshTokenService.createToken(eq(SAMPLE_EMAIL), eq(sampleUser.getRole()))).thenReturn(buildRefreshToken(SAMPLE_EMAIL, sampleUser.getRole()));
+        when(refreshTokenService.getRefreshTokenValidityMillis()).thenReturn(604800_000L);
 
         Map<String, String> body = Map.of(
                 "email", SAMPLE_EMAIL,
@@ -122,7 +164,9 @@ class UserControllerTest {
                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(sampleUser.getUserId()))
-                .andExpect(jsonPath("$.role").value(sampleUser.getRole()));
+                .andExpect(jsonPath("$.role").value(sampleUser.getRole()))
+                .andExpect(jsonPath("$.token").value("mock-token"))
+                .andExpect(jsonPath("$.refreshToken").value("refresh-token-admin"));
     }
 
     @Test
@@ -138,6 +182,10 @@ class UserControllerTest {
 
         when(customerService.findByEmailAndPassword(eq(SAMPLE_EMAIL), eq(SAMPLE_PASSWORD)))
                 .thenReturn(customer);
+        when(jwtTokenProvider.generateToken(eq(SAMPLE_EMAIL), eq("CUSTOMER"))).thenReturn("customer-token");
+        when(jwtTokenProvider.getExpirationMillis()).thenReturn(3600_000L);
+        when(refreshTokenService.createToken(eq(SAMPLE_EMAIL), eq("CUSTOMER"))).thenReturn(buildRefreshToken(SAMPLE_EMAIL, "CUSTOMER"));
+        when(refreshTokenService.getRefreshTokenValidityMillis()).thenReturn(604800_000L);
 
         Map<String, String> body = Map.of(
                 "email", SAMPLE_EMAIL,
@@ -150,7 +198,31 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(customer.getCustomerId()))
                 .andExpect(jsonPath("$.name").value(customer.getCustomerName()))
-                .andExpect(jsonPath("$.role").value("CUSTOMER"));
+                .andExpect(jsonPath("$.role").value("CUSTOMER"))
+                .andExpect(jsonPath("$.token").value("customer-token"))
+                .andExpect(jsonPath("$.refreshToken").value("refresh-token-customer"));
+    }
+
+    @Test
+    @DisplayName("POST /api/users/refresh returns new tokens when refresh token valid")
+    void refreshReturnsNewTokens() throws Exception {
+        RefreshToken rotated = buildRefreshToken(SAMPLE_EMAIL, "ADMIN");
+        rotated.setToken("rotated-refresh-token");
+
+        when(refreshTokenService.rotateToken(eq("existing-token"))).thenReturn(rotated);
+        when(refreshTokenService.getRefreshTokenValidityMillis()).thenReturn(604800_000L);
+        when(jwtTokenProvider.generateToken(eq(SAMPLE_EMAIL), eq("ADMIN"))).thenReturn("new-access");
+        when(jwtTokenProvider.getExpirationMillis()).thenReturn(3600_000L);
+
+        Map<String, String> body = Map.of("refreshToken", "existing-token");
+
+        mockMvc.perform(post("/api/users/refresh")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("new-access"))
+                .andExpect(jsonPath("$.refreshToken").value("rotated-refresh-token"))
+                .andExpect(jsonPath("$.role").value("ADMIN"));
     }
 
     @Test

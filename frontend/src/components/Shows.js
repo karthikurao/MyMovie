@@ -54,7 +54,7 @@ function Shows() {
 
   const filteredShows = shows.filter(show => {
     return (selectedTheatreId === null || show.theatreId === selectedTheatreId) &&
-           (selectedMovieId === null || show.movieId === selectedMovieId);
+      (selectedMovieId === null || show.movieId === selectedMovieId);
   });
 
   const handleBookTicket = (showId) => {
@@ -108,7 +108,7 @@ function Shows() {
 
   return (
     <Container className="py-5">
-      <div className="text-center mb-5">
+      <div className="text-center mb-5 page-heading-dark">
         <h1 className="display-4 mb-3">🎭 Available Shows</h1>
         <p className="lead">Book your tickets for the best movie experiences</p>
       </div>
@@ -116,10 +116,10 @@ function Shows() {
       {/* Enhanced Filters Section */}
       <Card className="mb-5 shadow-sm" style={{ borderRadius: '15px', border: 'none' }}>
         <Card.Header className="bg-gradient text-white text-center py-3"
-                    style={{
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      borderRadius: '15px 15px 0 0'
-                    }}>
+          style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '15px 15px 0 0'
+          }}>
           <h5 className="mb-0">🔍 Filter Shows</h5>
         </Card.Header>
         <Card.Body className="p-4">
@@ -193,7 +193,7 @@ function Shows() {
 
               return (
                 <Col key={show.showId} lg={6} className="mb-4">
-                  <Card className="movie-card h-100 show-card">
+                  <Card className="movie-card h-100 show-card surface-dark">
                     <Card.Body className="p-4">
                       <div className="d-flex justify-content-between align-items-start mb-3">
                         <div>
