@@ -1,6 +1,7 @@
 package com.moviebooking.controller;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moviebooking.config.JwtTokenProvider;
 import com.moviebooking.dto.BookingRequest;
 import com.moviebooking.dto.MovieBookingSummary;
+import com.moviebooking.dto.TicketView;
 import com.moviebooking.entity.Ticket;
 import com.moviebooking.entity.TicketBooking;
 import com.moviebooking.repository.ICustomerRepository;
@@ -31,6 +33,7 @@ import com.moviebooking.service.IBookingService;
 @WebMvcTest(BookingController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @DisplayName("BookingController")
+@SuppressWarnings("unused")
 class BookingControllerTest {
 
     @Autowired
@@ -59,6 +62,7 @@ class BookingControllerTest {
         booking.setShowId(10);
         booking.setBookingDate(LocalDate.of(2025, 10, 1));
         booking.setTransactionId(12345);
+        booking.setPaymentReference("pi_test_123");
         booking.setTransactionMode("ONLINE");
         booking.setTransactionStatus("CONFIRMED");
         booking.setTotalCost(450.0);
@@ -92,6 +96,7 @@ class BookingControllerTest {
         request.setTotalCost(800.0);
         request.setBookingDate(LocalDate.of(2025, 10, 1));
         request.setPaymentMode("UPI");
+        request.setPaymentIntentId("pi_test_999");
 
         Ticket ticket = new Ticket();
         ticket.setTicketId(3);
@@ -105,6 +110,7 @@ class BookingControllerTest {
         booking.setShowId(request.getShowId());
         booking.setBookingDate(request.getBookingDate());
         booking.setTransactionId(999999);
+        booking.setPaymentReference("pi_test_999");
         booking.setTransactionMode("UPI");
         booking.setTransactionStatus("CONFIRMED");
         booking.setTotalCost(request.getTotalCost());
@@ -152,5 +158,57 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[0].movieId").value(summary.getMovieId()))
                 .andExpect(jsonPath("$[0].totalBookings").value((int) summary.getTotalBookings()))
                 .andExpect(jsonPath("$[0].totalRevenue").value(summary.getTotalRevenue()));
+    }
+
+    @Test
+    @DisplayName("GET /api/bookings/customer/{id} returns ticket views")
+    void getBookingsForCustomer_returnsTickets() throws Exception {
+        TicketView ticket = new TicketView(
+                101,
+                55,
+                LocalDate.of(2025, 11, 4),
+                7654321,
+                998877,
+                "CARD",
+                "CONFIRMED",
+                "pi_test_123",
+                1250.0,
+                List.of("A1", "A2"),
+                2,
+                22,
+                "Evening Show",
+                LocalDateTime.of(2025, 11, 30, 19, 0),
+                LocalDateTime.of(2025, 11, 30, 21, 30),
+                9,
+                "Interstellar",
+                "Sci-Fi",
+                "English",
+                "https://example.com/poster.jpg",
+                4,
+                "Galaxy Cinemas",
+                "Bengaluru",
+                7,
+                "Screen 2"
+        );
+
+        when(bookingService.findBookingsForCustomer(5)).thenReturn(List.of(ticket));
+
+        mockMvc.perform(get("/api/bookings/customer/{id}", 5)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].bookingId").value(ticket.getBookingId()))
+                .andExpect(jsonPath("$[0].seatNumbers[0]").value("A1"))
+                .andExpect(jsonPath("$[0].movieName").value("Interstellar"));
+    }
+
+    @Test
+    @DisplayName("GET /api/bookings/customer/{id} returns 404 when customer missing")
+    void getBookingsForCustomer_handlesMissingCustomer() throws Exception {
+        when(bookingService.findBookingsForCustomer(999)).thenThrow(new IllegalArgumentException("Customer not found with ID: 999"));
+
+        mockMvc.perform(get("/api/bookings/customer/{id}", 999)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Customer not found with ID: 999"));
     }
 }

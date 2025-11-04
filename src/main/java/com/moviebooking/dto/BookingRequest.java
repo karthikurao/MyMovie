@@ -11,6 +11,7 @@ public class BookingRequest {
     private double totalCost;
     private LocalDate bookingDate;
     private String paymentMode;
+    private String paymentIntentId;
 
     public int getShowId() {
         return showId;
@@ -58,5 +59,13 @@ public class BookingRequest {
 
     public void setPaymentMode(String paymentMode) {
         this.paymentMode = paymentMode;
+    }
+
+    public String getPaymentIntentId() {
+        return paymentIntentId;
+    }
+
+    public void setPaymentIntentId(String paymentIntentId) {
+        this.paymentIntentId = paymentIntentId;
     }
 }

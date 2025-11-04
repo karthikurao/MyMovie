@@ -10,6 +10,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import CustomerDashboard from './components/CustomerDashboard';
 import AdminDashboard from './components/AdminDashboard';
+import TicketView from './components/TicketView';
 import './App.css';
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/customer" element={<CustomerDashboard />} />
+            <Route path="/tickets" element={<TicketView />} />
           </Routes>
         </div>
       </div>

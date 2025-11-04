@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Card, Button, Alert, Modal, Container, Badge } from 'react-bootstrap';
+import { Row, Col, Card, Button, Alert, Modal, Container, Badge, Spinner } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 
 const SEAT_PRICES = {
   A: 400,
@@ -12,6 +14,116 @@ const SEAT_PRICES = {
 const SEAT_ROWS = ['A', 'B', 'C', 'D'];
 const SEATS_PER_ROW = 8;
 const MOCK_OCCUPIED_SEATS = ['A2', 'A5', 'B3', 'C1', 'C7'];
+
+const publishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
+
+const CARD_ELEMENT_OPTIONS = {
+  hidePostalCode: true,
+  style: {
+    base: {
+      fontSize: '16px',
+      color: '#32325d',
+      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+      '::placeholder': {
+        color: '#a0aec0'
+      }
+    },
+    invalid: {
+      color: '#fa755a'
+    }
+  }
+};
+
+function CheckoutForm({ clientSecret, amount, customer, onSuccess, onCancel, reportError }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [cardError, setCardError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setCardError('');
+
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setCardError('Card details could not be loaded. Please refresh and try again.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        card: cardElement,
+        billing_details: {
+          name: customer?.customerName,
+          email: customer?.email
+        }
+      }
+    });
+
+    if (error) {
+      const message = error.message || 'Payment failed. Please try another card.';
+      setCardError(message);
+      reportError(message);
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
+      try {
+        await onSuccess(paymentIntent);
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      const message = 'Payment was not completed. Please try again.';
+      setCardError(message);
+      reportError(message);
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="p-3 border rounded">
+        <CardElement options={CARD_ELEMENT_OPTIONS} onChange={(event) => {
+          if (event.error) {
+            setCardError(event.error.message || 'Invalid card details');
+          } else {
+            setCardError('');
+          }
+        }} />
+      </div>
+      {cardError && (
+        <Alert variant="danger" className="mt-3 mb-0">
+          {cardError}
+        </Alert>
+      )}
+      <div className="d-flex justify-content-between align-items-center mt-4">
+        <Button variant="outline-secondary" onClick={onCancel} disabled={isSubmitting}>
+          Cancel
+        </Button>
+        <Button type="submit" variant="primary" disabled={!stripe || isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Spinner animation="border" size="sm" className="me-2" />
+              Processing...
+            </>
+          ) : (
+            `Pay ₹${amount.toLocaleString()}`
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+}
 
 function BookTicket() {
   const { showId } = useParams();
@@ -24,7 +136,21 @@ function BookTicket() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentIntentSecret, setPaymentIntentSecret] = useState('');
+  const [paymentIntentId, setPaymentIntentId] = useState('');
+  const [isPaymentIntentLoading, setIsPaymentIntentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
+  const [paymentReference, setPaymentReference] = useState('');
   const navigate = useNavigate();
+
+  const resetPaymentState = () => {
+    setShowPaymentModal(false);
+    setPaymentIntentSecret('');
+    setPaymentIntentId('');
+    setIsPaymentIntentLoading(false);
+    setPaymentError('');
+  };
 
   const fetchShowDetails = useCallback(async () => {
     try {
@@ -123,7 +249,7 @@ function BookTicket() {
     return SEAT_PRICES[row] ?? SEAT_PRICES.C;
   };
 
-  const handleBooking = async () => {
+  const handleInitiateCheckout = async () => {
     if (selectedSeats.length === 0) {
       setError('Please select at least one seat.');
       return;
@@ -135,20 +261,82 @@ function BookTicket() {
       return;
     }
 
-    try {
-      const bookingData = {
-        showId: parseInt(showId),
-        customerId: customer.customerId,
-        seatNumbers: selectedSeats,
-        totalCost: totalCost,
-        bookingDate: new Date().toISOString().split('T')[0]
-      };
-
-      await axios.post('/api/bookings', bookingData);
-      setShowModal(true);
-    } catch (err) {
-      setError('Booking failed. Please try again.');
+    if (!publishableKey || !stripePromise) {
+      setPaymentError('Payment configuration is missing. Please add the Stripe publishable key.');
+      return;
     }
+
+    if (totalCost <= 0) {
+      setPaymentError('Unable to calculate the total cost. Please re-select your seats.');
+      return;
+    }
+
+    try {
+      setIsPaymentIntentLoading(true);
+      setError('');
+      setPaymentError('');
+      setPaymentReference('');
+
+      const amountInPaise = Math.round(totalCost * 100);
+      const seatSummary = selectedSeats.join(', ');
+      const description = `Booking for show ${show?.showName ?? showId} - Seats: ${seatSummary}`;
+
+      const response = await axios.post('/api/payments/create-intent', {
+        amount: amountInPaise,
+        currency: 'inr',
+        receiptEmail: customer.email,
+        description
+      });
+
+      setPaymentIntentSecret(response.data.clientSecret);
+      setPaymentIntentId(response.data.paymentIntentId);
+      setShowPaymentModal(true);
+    } catch (err) {
+      console.error('Failed to create payment intent:', err);
+      const message = err.response?.data?.error
+        || (err.message ? `Unable to initiate payment: ${err.message}` : 'Unable to initiate payment. Please try again.');
+      setPaymentError(message);
+    } finally {
+      setIsPaymentIntentLoading(false);
+    }
+  };
+
+  const submitBooking = async (paymentIntentIdentifier) => {
+    const bookingData = {
+      showId: parseInt(showId, 10),
+      customerId: customer.customerId,
+      seatNumbers: selectedSeats,
+      totalCost,
+      bookingDate: new Date().toISOString().split('T')[0],
+      paymentMode: 'CARD',
+      paymentIntentId: paymentIntentIdentifier
+    };
+
+    await axios.post('/api/bookings', bookingData);
+  };
+
+  const handlePaymentSuccess = async (paymentIntent) => {
+    try {
+      await submitBooking(paymentIntent.id);
+      setPaymentReference(paymentIntent.id);
+      setError('');
+      setPaymentError('');
+      setShowModal(true);
+      setSelectedSeats([]);
+      resetPaymentState();
+    } catch (err) {
+      console.error('Payment succeeded but booking failed:', err);
+      const message = 'Payment succeeded but booking could not be completed. Please contact support with your payment reference.';
+      setPaymentError(message);
+      setError(message);
+    }
+  };
+
+  const handleClosePaymentModal = () => {
+    if (isPaymentIntentLoading) {
+      return;
+    }
+    resetPaymentState();
   };
 
   const formatDateTime = (dateTime) => {
@@ -372,23 +560,73 @@ function BookTicket() {
                 <h4 className="text-success mb-3">
                   Total: ₹{totalCost.toLocaleString()}
                 </h4>
+                {paymentError && !showPaymentModal && (
+                  <Alert variant="warning" className="text-start">
+                    {paymentError}
+                  </Alert>
+                )}
                 <Button
                   variant="success"
                   size="lg"
-                  onClick={handleBooking}
+                  onClick={handleInitiateCheckout}
                   className="w-100"
                   style={{ borderRadius: '25px' }}
+                  disabled={isPaymentIntentLoading}
                 >
-                  💳 Confirm Booking
+                  {isPaymentIntentLoading ? (
+                    <>
+                      <Spinner animation="border" size="sm" className="me-2" />
+                      Starting Payment...
+                    </>
+                  ) : (
+                    '💳 Proceed to Payment'
+                  )}
                 </Button>
               </Col>
             </Row>
           </Card.Body>
         </Card>
       )}
+      {/* Payment Modal */}
+      <Modal show={showPaymentModal} onHide={handleClosePaymentModal} centered backdrop="static">
+        <Modal.Header closeButton style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)', color: 'white' }}>
+          <Modal.Title>Complete Your Payment</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="p-4">
+          <p className="mb-3 text-muted">Enter your card details to pay ₹{totalCost.toLocaleString()} for the selected seats.</p>
+          {paymentIntentId && (
+            <div className="mb-3">
+              <small className="text-muted">Payment Reference (temporary):</small>
+              <div className="fw-semibold" style={{ wordBreak: 'break-all' }}>{paymentIntentId}</div>
+            </div>
+          )}
+          {paymentError && (
+            <Alert variant="danger" className="mb-3">
+              {paymentError}
+            </Alert>
+          )}
+          {stripePromise && paymentIntentSecret ? (
+            <Elements stripe={stripePromise} options={{ clientSecret: paymentIntentSecret }}>
+              <CheckoutForm
+                clientSecret={paymentIntentSecret}
+                amount={totalCost}
+                customer={customer}
+                onSuccess={handlePaymentSuccess}
+                onCancel={handleClosePaymentModal}
+                reportError={setPaymentError}
+              />
+            </Elements>
+          ) : (
+            <div className="text-center py-4">
+              <Spinner animation="border" role="status" />
+              <p className="mt-3 mb-0">Preparing secure payment form...</p>
+            </div>
+          )}
+        </Modal.Body>
+      </Modal>
 
       {/* Success Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+      <Modal show={showModal} onHide={() => { setShowModal(false); setPaymentReference(''); }} centered>
         <Modal.Header closeButton style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
           <Modal.Title>🎉 Booking Confirmed!</Modal.Title>
         </Modal.Header>
@@ -400,6 +638,11 @@ function BookTicket() {
           <p className="text-muted">
             You will receive a confirmation email shortly.
           </p>
+          {paymentReference && (
+            <Alert variant="success">
+              Payment reference: <strong>{paymentReference}</strong>
+            </Alert>
+          )}
           <div className="mt-3">
             <Badge bg="success" className="me-2">Seats: {selectedSeats.join(', ')}</Badge>
             <Badge bg="info">Total: ₹{totalCost.toLocaleString()}</Badge>

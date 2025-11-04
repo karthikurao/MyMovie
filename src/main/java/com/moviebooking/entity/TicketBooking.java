@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Table(name = "ticket_bookings")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class TicketBooking {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int bookingId;
@@ -25,6 +26,9 @@ public class TicketBooking {
     @NotNull(message = "Transaction ID is required")
     @Column(nullable = false)
     private int transactionId;
+
+    @Column(name = "payment_reference", length = 64)
+    private String paymentReference;
 
     @NotBlank(message = "Transaction mode is required")
     @Column(nullable = false)
@@ -54,10 +58,11 @@ public class TicketBooking {
     private Show show;
 
     // Constructors
-    public TicketBooking() {}
+    public TicketBooking() {
+    }
 
     public TicketBooking(int showId, LocalDate bookingDate, int transactionId,
-                        String transactionMode, String transactionStatus, double totalCost) {
+            String transactionMode, String transactionStatus, double totalCost) {
         this.showId = showId;
         this.bookingDate = bookingDate;
         this.transactionId = transactionId;
@@ -97,6 +102,14 @@ public class TicketBooking {
 
     public void setTransactionId(int transactionId) {
         this.transactionId = transactionId;
+    }
+
+    public String getPaymentReference() {
+        return paymentReference;
+    }
+
+    public void setPaymentReference(String paymentReference) {
+        this.paymentReference = paymentReference;
     }
 
     public String getTransactionMode() {

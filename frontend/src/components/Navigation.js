@@ -148,9 +148,14 @@ function Navigation() {
 								)}
 
 								{user.role === 'CUSTOMER' && (
-									<LinkContainer to="/customer-dashboard">
-										<Nav.Link>Dashboard</Nav.Link>
-									</LinkContainer>
+									<>
+										<LinkContainer to="/customer-dashboard">
+											<Nav.Link>Dashboard</Nav.Link>
+										</LinkContainer>
+										<LinkContainer to="/tickets">
+											<Nav.Link>My Tickets</Nav.Link>
+										</LinkContainer>
+									</>
 								)}
 
 								<div

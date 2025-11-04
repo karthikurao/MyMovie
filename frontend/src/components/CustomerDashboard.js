@@ -1,36 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Row, Col, Card, Button, Alert, Table, Container, Badge } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function CustomerDashboard() {
-  const [bookings, setBookings] = useState([]);
+  const [sessionUser, setSessionUser] = useState(null);
   const [customer, setCustomer] = useState(null);
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (!user.userId) {
-      navigate('/login');
+  const loadCustomerProfile = useCallback(async (customerId, fallbackProfile) => {
+    if (!customerId) {
       return;
     }
-    setCustomer(user);
-    fetchCustomerData();
-  }, [navigate]);
+    try {
+      const response = await axios.get(`/api/customers/${customerId}`, { timeout: 10000 });
+      setCustomer(response.data || fallbackProfile);
+    } catch (err) {
+      console.warn('Unable to load customer profile', err);
+      setCustomer(fallbackProfile);
+    }
+  }, []);
 
-  const fetchCustomerData = async () => {
+  const fetchCustomerData = useCallback(async (customerId) => {
+    const targetId = customerId ?? sessionUser?.userId;
+    if (!targetId) {
+      return;
+    }
+
     try {
       setLoading(true);
       setError('');
-      // In a real app, you'd fetch customer-specific bookings
-      const response = await axios.get('/api/bookings', { timeout: 10000 });
-      setBookings(response.data || []);
+      const response = await axios.get(`/api/bookings/customer/${targetId}`, { timeout: 10000 });
+      setBookings(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Error fetching bookings:', err);
       if (err.code === 'ECONNABORTED') {
         setError('Request timeout. Please check if the backend server is running.');
+      } else if (err.response && err.response.status === 404) {
+        setError('No bookings found for this account yet.');
+        setBookings([]);
       } else if (err.request) {
         setError('Unable to connect to server. Please ensure the backend is running.');
       } else {
@@ -39,7 +50,27 @@ function CustomerDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sessionUser]);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.userId || user.role !== 'CUSTOMER') {
+      navigate('/login');
+      return;
+    }
+
+    setSessionUser(user);
+
+    const fallbackProfile = {
+      customerId: user.userId,
+      customerName: user.name || user.firstName || user.username || user.email || 'Movie Lover',
+      email: user.email
+    };
+    setCustomer(fallbackProfile);
+
+    loadCustomerProfile(user.userId, fallbackProfile);
+    fetchCustomerData(user.userId);
+  }, [navigate, loadCustomerProfile, fetchCustomerData]);
 
   const getStatusBadge = (status) => {
     const variants = {
@@ -49,6 +80,44 @@ function CustomerDashboard() {
       'COMPLETED': 'info'
     };
     return variants[status] || 'secondary';
+  };
+
+  const formatShowDate = (value) => {
+    if (!value) {
+      return 'Date TBD';
+    }
+    return new Date(value).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const formatShowTime = (value) => {
+    if (!value) {
+      return '--';
+    }
+    return new Date(value).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  };
+
+  const totalSpent = useMemo(() => bookings.reduce((sum, booking) => sum + (booking.totalCost || 0), 0), [bookings]);
+  const uniqueMovies = useMemo(() => new Set(bookings.map((b) => b.movieId).filter(Boolean)).size, [bookings]);
+  const upcomingShows = useMemo(() => {
+    const now = new Date();
+    return bookings.filter((booking) => booking.showStartTime && new Date(booking.showStartTime) >= now).length;
+  }, [bookings]);
+
+  const displayName = customer?.customerName
+    || sessionUser?.name
+    || sessionUser?.firstName
+    || sessionUser?.username
+    || 'Movie Lover';
+
+  const handleRetry = () => {
+    fetchCustomerData();
   };
 
   if (loading) {
@@ -69,7 +138,7 @@ function CustomerDashboard() {
       <div className="text-center mb-5">
         <h1 className="display-4 mb-3">👋 Welcome Back!</h1>
         <p className="lead">
-          Hello {customer?.name || 'Movie Lover'}, manage your bookings and discover new movies
+          Hello {displayName}, manage your bookings and discover new movies
         </p>
       </div>
 
@@ -78,7 +147,7 @@ function CustomerDashboard() {
           <Alert.Heading>🚫 Error</Alert.Heading>
           <p>{error}</p>
           <hr />
-          <Button variant="outline-danger" onClick={fetchCustomerData}>
+          <Button variant="outline-danger" onClick={handleRetry}>
             🔄 Retry
           </Button>
         </Alert>
@@ -100,7 +169,7 @@ function CustomerDashboard() {
             <Card.Body>
               <div className="feature-icon" style={{ fontSize: '3rem', marginBottom: '1rem' }}>💰</div>
               <h3 className="text-success mb-2">
-                ₹{bookings.reduce((sum, booking) => sum + (booking.totalCost || 0), 0).toLocaleString()}
+                ₹{totalSpent.toLocaleString()}
               </h3>
               <p className="mb-0">Total Spent</p>
             </Card.Body>
@@ -111,7 +180,7 @@ function CustomerDashboard() {
             <Card.Body>
               <div className="feature-icon" style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎬</div>
               <h3 className="text-info mb-2">
-                {new Set(bookings.map(b => b.movieId)).size}
+                {uniqueMovies}
               </h3>
               <p className="mb-0">Movies Watched</p>
             </Card.Body>
@@ -120,9 +189,9 @@ function CustomerDashboard() {
         <Col md={3} className="mb-4">
           <Card className="feature-card h-100 text-center">
             <Card.Body>
-              <div className="feature-icon" style={{ fontSize: '3rem', marginBottom: '1rem' }}>⭐</div>
-              <h3 className="text-warning mb-2">4.8</h3>
-              <p className="mb-0">Your Rating</p>
+              <div className="feature-icon" style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏰</div>
+              <h3 className="text-warning mb-2">{upcomingShows}</h3>
+              <p className="mb-0">Upcoming Shows</p>
             </Card.Body>
           </Card>
         </Col>
@@ -131,10 +200,10 @@ function CustomerDashboard() {
       {/* Quick Actions */}
       <Card className="mb-5 shadow-sm" style={{ borderRadius: '15px', border: 'none' }}>
         <Card.Header className="bg-gradient text-white text-center py-3"
-                    style={{
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      borderRadius: '15px 15px 0 0'
-                    }}>
+          style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '15px 15px 0 0'
+          }}>
           <h5 className="mb-0">🚀 Quick Actions</h5>
         </Card.Header>
         <Card.Body className="p-4">
@@ -173,7 +242,17 @@ function CustomerDashboard() {
               <Button
                 variant="outline-success"
                 className="w-100"
-                onClick={fetchCustomerData}
+                onClick={() => navigate('/tickets')}
+                style={{ borderRadius: '15px', padding: '1rem' }}
+              >
+                🎟️ View Tickets
+              </Button>
+            </Col>
+            <Col md={3} className="mb-3">
+              <Button
+                variant="outline-success"
+                className="w-100"
+                onClick={handleRetry}
                 style={{ borderRadius: '15px', padding: '1rem' }}
               >
                 🔄 Refresh Data
@@ -243,24 +322,26 @@ function CustomerDashboard() {
                       </td>
                       <td className="px-4 py-3">
                         <div>
-                          <strong>{booking.showDate || new Date().toLocaleDateString()}</strong>
+                          <strong>{formatShowDate(booking.showStartTime)}</strong>
                           <br />
-                          <small className="text-muted">{booking.showTime || '7:00 PM'}</small>
+                          <small className="text-muted">{formatShowTime(booking.showStartTime)}</small>
                         </div>
                       </td>
                       <td className="px-4 py-3">
                         <Badge bg="info">
-                          {booking.seatNumbers?.join(', ') || `${booking.noOfSeats || 2} seats`}
+                          {Array.isArray(booking.seatNumbers) && booking.seatNumbers.length > 0
+                            ? booking.seatNumbers.join(', ')
+                            : `${booking.seatCount ?? booking.noOfSeats ?? 0} seats`}
                         </Badge>
                       </td>
                       <td className="px-4 py-3">
                         <strong className="text-success">
-                          ₹{(booking.totalCost || 500).toLocaleString()}
+                          ₹{Number(booking.totalCost ?? 0).toLocaleString()}
                         </strong>
                       </td>
                       <td className="px-4 py-3">
-                        <Badge bg={getStatusBadge(booking.status || 'CONFIRMED')}>
-                          {booking.status || 'CONFIRMED'}
+                        <Badge bg={getStatusBadge((booking.transactionStatus || '').toUpperCase())}>
+                          {booking.transactionStatus || 'CONFIRMED'}
                         </Badge>
                       </td>
                       <td className="px-4 py-3">
@@ -269,6 +350,7 @@ function CustomerDashboard() {
                             variant="outline-primary"
                             size="sm"
                             style={{ borderRadius: '10px' }}
+                            onClick={() => navigate('/tickets', { state: { bookingId: booking.bookingId } })}
                           >
                             📱 Ticket
                           </Button>

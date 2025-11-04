@@ -9,6 +9,7 @@ MyMovie is a full-stack ticketing platform built with Spring Boot and React. The
 - Admin dashboard that provides full CRUD for movies, theatres, screens, and shows with inline validation and dependent selects.
 - Robust booking workflow that validates seat availability server-side before confirming a ticket.
 - Modern authentication stack: JWT access tokens, rotating refresh tokens, global Axios interceptors, and stateless Spring Security guards.
+- Stripe-powered card payments that create PaymentIntents on the server and confirm them in the React checkout modal before persisting a booking.
 
 ## Backend Capabilities (Spring Boot)
 - Portable SQLite database (`mymovie.db`) stored alongside the source; seeded with admins, customers, movies, theatres, screens, shows, seats, and sample bookings.
@@ -17,6 +18,7 @@ MyMovie is a full-stack ticketing platform built with Spring Boot and React. The
 - Aggregation endpoint (`GET /api/bookings/summary/movies`) that returns movie-level booking counts and revenue totals.
 - JWT suite located under `config/` (`JwtTokenProvider`, `JwtAuthenticationFilter`, `SecurityConfig`, etc.) securing all protected endpoints in a stateless fashion.
 - Refresh tokens persisted in SQLite (`RefreshToken` entity + repository/service layer) providing rotation and revocation support backing the `/api/users/refresh` endpoint.
+- Dedicated `PaymentController` + `PaymentServiceImpl` wrapper around Stripe's Java SDK that issues PaymentIntents using the configured secret key and guards against missing configuration.
 - Automated test coverage includes controller/service unit tests and an integration test (`UserControllerIntegrationTest`) that exercises sign-in plus refresh-token rotation.
 
 ## Frontend Capabilities (React SPA)
@@ -26,6 +28,7 @@ MyMovie is a full-stack ticketing platform built with Spring Boot and React. The
 - Axios configuration module (`frontend/src/api/axiosConfig.js`) that applies base URLs, injects bearer tokens, refreshes tokens transparently, and broadcasts session-expiry events.
 - Reusable datetime helpers (`frontend/src/utils/datetime.js`) ensuring UI forms send ISO-compatible timestamps to Spring.
 - Navigation fixes and contrast improvements across the SPA so buttons and links remain accessible.
+- `BookTicket` now opens a Stripe-powered payment modal (Card Element) that confirms a PaymentIntent before the booking API is called, with graceful error handling and payment reference surfacing in the success dialog.
 
 ## Authentication Flow
 - `POST /api/users/signin` and `POST /api/users/register` return JWT access tokens, refresh tokens, expiry metadata, and user role details.
@@ -93,6 +96,15 @@ npm start
 ```
 The React dev server runs on `http://localhost:3000` and proxies API calls to the backend.
 
+### Stripe Setup
+1. Create a copy of `frontend/.env.example` named `.env` and paste your Stripe publishable key:
+   ```env
+   REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_...
+   ```
+   Restart the React dev server after editing the `.env` file.
+2. Expose your Stripe secret key to the backend by either setting the `STRIPE_SECRET_KEY` environment variable or updating `src/main/resources/application.properties` (`stripe.secret-key=sk_test_...`).
+3. Optional: update `stripe.currency` in `application.properties` if you plan to charge in a currency other than INR.
+
 ## Testing
 ```powershell
 cd C:\Users\P12C4F0\IdeaProjects\MyMovie
@@ -111,6 +123,7 @@ mvn test
 | CRUD screens | `GET/POST/PUT/DELETE /api/screens` |
 | CRUD shows | `GET/POST/PUT/DELETE /api/shows` |
 | Create booking (seat validation) | `POST /api/bookings` |
+| Create Stripe PaymentIntent | `POST /api/payments/create-intent` |
 | Booking summary by movie | `GET /api/bookings/summary/movies` |
 
 ## Database Management Tips
