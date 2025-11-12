@@ -105,6 +105,33 @@ The React dev server runs on `http://localhost:3000` and proxies API calls to th
 2. Expose your Stripe secret key to the backend by either setting the `STRIPE_SECRET_KEY` environment variable or updating `src/main/resources/application.properties` (`stripe.secret-key=sk_test_...`).
 3. Optional: update `stripe.currency` in `application.properties` if you plan to charge in a currency other than INR.
 
+### Stripe Test Card Details
+Use these test card numbers for payment testing:
+
+**Successful Payments:**
+- **Visa**: `4242424242424242`
+- **Visa (debit)**: `4000056655665556`
+- **Mastercard**: `5555555555554444`
+- **American Express**: `378282246310005`
+
+**Declined Payments:**
+- **Generic decline**: `4000000000000002`
+- **Insufficient funds**: `4000000000009995`
+- **Lost card**: `4000000000009987`
+- **Stolen card**: `4000000000009979`
+
+**3D Secure Authentication:**
+- **Authentication required**: `4000002500003155`
+- **Authentication fails**: `4000008400001629`
+
+**Additional Test Details:**
+- **Expiry Date**: Use any future date (e.g., `12/34`)
+- **CVC**: Use any 3-digit number (4 digits for Amex)
+- **Name**: Use any name
+- **ZIP/Postal Code**: Use any valid format
+
+For more test scenarios, visit: https://stripe.com/docs/testing#cards
+
 ## Testing
 ```powershell
 cd C:\Users\P12C4F0\IdeaProjects\MyMovie
@@ -112,19 +139,62 @@ mvn test
 ```
 `UserControllerIntegrationTest` spins up the application with an in-memory SQLite database and asserts that access tokens and refresh tokens rotate correctly.
 
-## API Reference (selected)
-| Purpose | Method & Path |
-| --- | --- |
-| Register a user | `POST /api/users/register` |
-| Sign in / issue JWT | `POST /api/users/signin` |
-| Refresh tokens | `POST /api/users/refresh` |
-| CRUD movies | `GET/POST/PUT/DELETE /api/movies` |
-| CRUD theatres | `GET/POST/PUT/DELETE /api/theatres` |
-| CRUD screens | `GET/POST/PUT/DELETE /api/screens` |
-| CRUD shows | `GET/POST/PUT/DELETE /api/shows` |
-| Create booking (seat validation) | `POST /api/bookings` |
-| Create Stripe PaymentIntent | `POST /api/payments/create-intent` |
-| Booking summary by movie | `GET /api/bookings/summary/movies` |
+## API Reference
+
+### Authentication Endpoints
+| Endpoint | Method | Description | Request Body |
+| --- | --- | --- | --- |
+| `/api/users/register` | POST | Register new user/customer | `{email, password, role}` |
+| `/api/users/signin` | POST | Authenticate and get tokens | `{email, password}` |
+| `/api/users/refresh` | POST | Refresh access token | `{refreshToken}` |
+| `/api/users/signout` | POST | Revoke refresh token | `{email, userId, role}` |
+
+### Movie Management
+| Endpoint | Method | Description | Request Body |
+| --- | --- | --- | --- |
+| `/api/movies` | GET | Get all movies | - |
+| `/api/movies/{id}` | GET | Get movie by ID | - |
+| `/api/movies` | POST | Create new movie | `{movieName, movieGenre, movieHours, language, description, imageUrl}` |
+| `/api/movies/{id}` | PUT | Update movie | Movie object |
+| `/api/movies/{id}` | DELETE | Delete movie | - |
+
+### Theatre & Screen Management
+| Endpoint | Method | Description | Request Body |
+| --- | --- | --- | --- |
+| `/api/theatres` | GET | Get all theatres | - |
+| `/api/theatres/{id}` | GET | Get theatre by ID | - |
+| `/api/theatres` | POST | Create theatre | `{theatreName, theatreCity, managerName, managerContact}` |
+| `/api/theatres/{id}` | PUT | Update theatre | Theatre object |
+| `/api/theatres/{id}` | DELETE | Delete theatre | - |
+| `/api/screens` | GET | Get all screens | - |
+| `/api/screens/theatre/{theatreId}` | GET | Get screens by theatre | - |
+| `/api/screens` | POST | Create screen | `{theatreId, screenName, rows, columns}` |
+
+### Show Management
+| Endpoint | Method | Description | Request Body |
+| --- | --- | --- | --- |
+| `/api/shows` | GET | Get all shows | - |
+| `/api/shows/{id}` | GET | Get show by ID | - |
+| `/api/shows` | POST | Create show | `{showStartTime, showEndTime, showName, screenId, theatreId, movieId}` |
+| `/api/shows/{id}` | PUT | Update show | Show object |
+| `/api/shows/{id}` | DELETE | Delete show | - |
+| `/api/shows/theatre/{theatreId}` | GET | Get shows by theatre | - |
+
+### Booking & Payment
+| Endpoint | Method | Description | Request Body |
+| --- | --- | --- | --- |
+| `/api/bookings` | GET | Get all bookings (Admin) | - |
+| `/api/bookings` | POST | Create new booking | `{showId, customerId, seatNumbers[], totalCost, paymentIntentId}` |
+| `/api/bookings/customer/{customerId}` | GET | Get customer's tickets | - |
+| `/api/bookings/summary/movies` | GET | Get booking summary by movie | - |
+| `/api/payments/create-intent` | POST | Create Stripe PaymentIntent | `{amount, currency, receiptEmail, description}` |
+
+### Customer Management
+| Endpoint | Method | Description | Request Body |
+| --- | --- | --- | --- |
+| `/api/customers` | GET | Get all customers | - |
+| `/api/customers/{id}` | GET | Get customer by ID | - |
+| `/api/customers` | POST | Create customer | `{customerName, address, mobileNumber, email, password}` |
 
 ## Database Management Tips
 - The SQLite database is generated automatically and persists data across restarts; delete `mymovie.db` to reset to seed data.
