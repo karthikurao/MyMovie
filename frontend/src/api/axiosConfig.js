@@ -4,13 +4,27 @@ const AUTH_HEADER_KEY = 'Authorization';
 const DEFAULT_TOKEN_TYPE = 'Bearer';
 const REFRESH_ENDPOINT = '/api/users/refresh';
 
-const refreshClient = axios.create();
+let refreshClient = axios.create();
+let lastKnownBaseUrl = null;
+
+const applyBaseUrl = (baseUrl) => {
+    if (!baseUrl) {
+        return;
+    }
+
+    lastKnownBaseUrl = baseUrl;
+
+    if (axios.defaults.baseURL !== baseUrl) {
+        axios.defaults.baseURL = baseUrl;
+    }
+
+    if (refreshClient?.defaults) {
+        refreshClient.defaults.baseURL = baseUrl;
+    }
+};
 
 const configuredBaseUrl = process.env.REACT_APP_API_BASE_URL;
-if (configuredBaseUrl) {
-    axios.defaults.baseURL = configuredBaseUrl;
-    refreshClient.defaults.baseURL = configuredBaseUrl;
-}
+applyBaseUrl(configuredBaseUrl);
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -66,6 +80,12 @@ const requestRefreshToken = async (currentUser) => {
 
     if (currentUser.refreshTokenExpiresAt && Date.now() > currentUser.refreshTokenExpiresAt) {
         throw new Error('Refresh token expired');
+    }
+
+    // Ensure the refresh client targets the same API origin as the main axios instance when configured at runtime (e.g. tests)
+    const activeBaseUrl = axios.defaults.baseURL || lastKnownBaseUrl;
+    if (activeBaseUrl) {
+        applyBaseUrl(activeBaseUrl);
     }
 
     const response = await refreshClient.post(
@@ -192,3 +212,10 @@ axios.interceptors.response.use(
 );
 
 export default axios;
+
+export const __setRefreshClient = (client) => {
+    refreshClient = client || axios.create();
+    if (lastKnownBaseUrl) {
+        applyBaseUrl(lastKnownBaseUrl);
+    }
+};
