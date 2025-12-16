@@ -1,5 +1,73 @@
 # MyMovie – Movie Ticket Booking Platform
 
+## ⚠️ Security Notice
+**This repository has been sanitized to remove all sensitive API keys and secrets that were accidentally committed.** Before running this project, you must configure your own keys as described in the [Configuration Required](#configuration-required) section below.
+
+## Configuration Required
+
+### 1. JWT Secret Key (Backend)
+The JWT secret is used to sign authentication tokens. You must set your own secure key.
+
+**Location:** `src/main/resources/application.properties`
+
+**Option A - Environment Variable (Recommended):**
+```powershell
+# Windows PowerShell
+$env:JWT_SECRET="your-256-bit-secret-key-here-64-hex-characters"
+```
+```bash
+# Linux/macOS
+export JWT_SECRET="your-256-bit-secret-key-here-64-hex-characters"
+```
+
+**Option B - Direct Configuration:**
+Edit `src/main/resources/application.properties` and replace:
+```properties
+app.jwt.secret=${JWT_SECRET:your-256-bit-secret-key-here-replace-me-with-64-hex-chars}
+```
+With your own 256-bit (64 hex character) secret key:
+```properties
+app.jwt.secret=your-actual-64-character-hex-secret-key-here
+```
+
+**Generate a secure key:**
+```bash
+# Using OpenSSL
+openssl rand -hex 32
+```
+
+### 2. Stripe API Keys (Payment Integration)
+
+**Frontend - Publishable Key:**
+1. Create a file `frontend/.env` (copy from `frontend/.env.example`)
+2. Add your Stripe publishable key:
+   ```env
+   REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
+   ```
+3. Restart the React dev server after editing
+
+**Backend - Secret Key:**
+
+**Option A - Environment Variable (Recommended):**
+```powershell
+# Windows PowerShell
+$env:STRIPE_SECRET_KEY="sk_test_your_secret_key"
+```
+```bash
+# Linux/macOS
+export STRIPE_SECRET_KEY="sk_test_your_secret_key"
+```
+
+**Option B - Direct Configuration:**
+Edit `src/main/resources/application.properties`:
+```properties
+stripe.secret-key=sk_test_your_secret_key
+```
+
+**Get your Stripe keys:** https://dashboard.stripe.com/apikeys
+
+---
+
 ## Overview
 MyMovie is a full-stack ticketing platform built with Spring Boot and React. The codebase already ships with an end-to-end booking flow, seed data, JWT-based authentication, refresh-token rotation, and an admin workspace that can manage every core catalogue entity. Everything described below reflects functionality that exists in this repository today.
 
