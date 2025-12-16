@@ -1,8 +1,5 @@
 # MyMovie – Movie Ticket Booking Platform
 
-## ⚠️ Security Notice
-**This repository has been sanitized to remove all sensitive API keys and secrets that were accidentally committed.** Before running this project, you must configure your own keys as described in the [Configuration Required](#configuration-required) section below.
-
 ## Configuration Required
 
 ### 1. JWT Secret Key (Backend)
