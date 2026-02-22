@@ -3,11 +3,9 @@
 ## Configuration Required
 
 ### 1. JWT Secret Key (Backend)
-The JWT secret is used to sign authentication tokens. You must set your own secure key.
+The JWT secret is used to sign authentication tokens. The `JWT_SECRET` environment variable **must** be set before starting the application — the server will not start without it.
 
-**Location:** `src/main/resources/application.properties`
-
-**Option A - Environment Variable (Recommended):**
+**Set the environment variable:**
 ```powershell
 # Windows PowerShell
 $env:JWT_SECRET="your-256-bit-secret-key-here-64-hex-characters"
@@ -15,16 +13,6 @@ $env:JWT_SECRET="your-256-bit-secret-key-here-64-hex-characters"
 ```bash
 # Linux/macOS
 export JWT_SECRET="your-256-bit-secret-key-here-64-hex-characters"
-```
-
-**Option B - Direct Configuration:**
-Edit `src/main/resources/application.properties` and replace:
-```properties
-app.jwt.secret=${JWT_SECRET:your-256-bit-secret-key-here-replace-me-with-64-hex-chars}
-```
-With your own 256-bit (64 hex character) secret key:
-```properties
-app.jwt.secret=your-actual-64-character-hex-secret-key-here
 ```
 
 **Generate a secure key:**
@@ -45,7 +33,7 @@ openssl rand -hex 32
 
 **Backend - Secret Key:**
 
-**Option A - Environment Variable (Recommended):**
+Set the `STRIPE_SECRET_KEY` environment variable. If not set, payment endpoints will remain inactive.
 ```powershell
 # Windows PowerShell
 $env:STRIPE_SECRET_KEY="sk_test_your_secret_key"
@@ -53,12 +41,6 @@ $env:STRIPE_SECRET_KEY="sk_test_your_secret_key"
 ```bash
 # Linux/macOS
 export STRIPE_SECRET_KEY="sk_test_your_secret_key"
-```
-
-**Option B - Direct Configuration:**
-Edit `src/main/resources/application.properties`:
-```properties
-stripe.secret-key=sk_test_your_secret_key
 ```
 
 **Get your Stripe keys:** https://dashboard.stripe.com/apikeys
