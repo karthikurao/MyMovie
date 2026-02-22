@@ -45,6 +45,7 @@ class UserControllerIntegrationTest {
         registry.add("spring.datasource.hikari.minimum-idle", () -> "1");
         registry.add("spring.datasource.hikari.connection-timeout", () -> "60000");
         registry.add("spring.datasource.hikari.auto-commit", () -> "true");
+        // Test-only JWT secret – not used in production
         registry.add("app.jwt.secret", () -> "6e7672643439746573746f6e6c796b65796e6f7470726f64646f6e6f74757365");
     }
 
